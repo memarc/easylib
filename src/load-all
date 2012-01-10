@@ -1,0 +1,12 @@
+(* emacs: -*-SML-*- *)
+
+local
+    val modules = [
+        "dotreal.sml"
+      , "skicomb.sml"
+      , "flipflop.sml"
+      , "vector_x.sml"
+    ]
+in
+    val _ = map use modules
+end
