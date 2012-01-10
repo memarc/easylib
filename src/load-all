@@ -3,10 +3,12 @@
 local
     val modules = [
         "dotreal.sml"
+      , "Unsafe.sml"
       , "skicomb.sml"
       , "flipflop.sml"
       , "vector_x.sml"
+      , "vectorpair.sml"
     ]
 in
-    val _ = map use modules
+    val _ = app use modules
 end

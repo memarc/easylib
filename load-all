@@ -25,7 +25,5 @@ local
         let fun is_this_sig s' = (s = s')
         in List.exists is_this_sig (PolyML.Compiler.signatureNames ()) end
 in
-    val _ = if have_sig "ORD_KEY" then ()
-            else build_dir "../smlnj-lib"
-    val _ = map build_dir dirs
+    val _ = app build_dir dirs
 end

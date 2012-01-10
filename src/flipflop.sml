@@ -52,10 +52,7 @@ structure Flop : sig
     val apply: ('a -> 'b) * 'a -> 'b
 
     (*  Left section.  For instance, [Array.sub (a, i)] can be written
-     * [apply (lsect (a, Array.sub), i)].  This same function also works
-     * as the left part of an "infixify" idiom, as in [a <& sub &> i]
-     * (see the operator definitions at the end of this file).
-     * This is like the Haskell backticks, but not wired into the language. *)
+     * [apply (lsect (a, Array.sub), i)]. *)
     val lsect: 'a * ('a * 'b -> 'c) -> 'b -> 'c
 
     (* Right section. *)
@@ -81,14 +78,11 @@ end = struct
 end
 
 (* See above for the motivation for these *)
-infixr 3 &>
-val op &> = Flop.apply
+infixr 3 $
+val op $ = Flop.apply
 
 infix 4 <| 
 val op <| = Flop.lsect
 
 infix 4 |>
 val op |> = Flop.rsect
-
-infix 3 <&
-val op <& = Flop.apply

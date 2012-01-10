@@ -15,6 +15,8 @@ signature VECTOR_X = sig
 
     include VECTOR
 
+    val vector : int * 'a -> 'a vector
+
     val find_r : ('a -> bool) -> 'a vector -> 'a option
 
     val findi_r : (int * 'a -> bool) -> 'a vector -> (int * 'a) option
@@ -27,19 +29,23 @@ signature VECTOR_X = sig
 
     val collate_r : ('a * 'a -> order) -> 'a vector * 'a vector -> order
 
+    val existsi : (int * 'a -> bool) -> 'a vector -> bool
+
+    val alli : (int * 'a -> bool) -> 'a vector -> bool
+
 end
 
-local
+structure VectorX :> VECTOR_X = struct
+
     structure V = Vector
-    fun op //! (x, y) = Unsafe.Vector.sub (x, y)
+    fun op //! (x, y) = EasyUnsafe.Vector.sub (x, y)
     infix 8 //!
-    fun op //: (x, y) = Unsafe.Array.sub (x, y)
-    infix 8 //:
-in
-
-structure Vector_x :> VECTOR_X = struct
-
+    fun op <- (a, (i, x)) = EasyUnsafe.Vector.update (a, i, x)
+    infix 8 <-
+    val k = Skicomb.k
     open V
+
+    fun vector (n, x) = V.tabulate (n, k x)
 
     fun findi_r f v =
         let fun loop ~1 = NONE
@@ -61,25 +67,28 @@ structure Vector_x :> VECTOR_X = struct
         end
 
     fun fold_tabulate (n, f, x) =
-        if n = 0 then V.fromList [] else
-        let val a = Array.array (n + 1, x)
-            fun fr (0, _) = x
-              | fr (i, _) = f (i - 1, a //: (i - 1))
-        in
-            ( Array.modifyi fr a
-            ; V.tabulate (n, fn i => a //: (i - 1)) )
-        end
+        let val cell = ref x
+            val v = vector (n, x)
+            fun loop 0 = ()
+              | loop i =
+                let val i' = n - i
+                in
+                    cell := f (i', !cell)
+                  ; v <- (i', !cell)
+                  ; loop (i - 1)
+                end
+        in v before loop n end
 
     fun append (v1, v2) = V.concat [v1, v2]
 
     fun to_list v =
-        let val vr = ref []
-            val l1 = V.length v - 1
-            fun f (i, _) = vr := (v //! (l1 - i) :: !vr)
-        in
-            ( V.appi f v
-            ; !vr )
-        end
+        let val l1 = V.length v - 1
+            val res = ref []
+            fun loop ~1 = !res
+              | loop i =
+                ( res := v //! i :: !res
+                ; loop (i - 1) )
+        in loop l1 end
 
     fun collate_r f (a1, a2) = 
         let val (l1, l2) = (V.length a1 - 1, V.length a2 - 1)
@@ -92,6 +101,10 @@ structure Vector_x :> VECTOR_X = struct
                   | res => res
         in loop (l1, l2) end
 
-end                             (* structure *)
+    fun existsi f v =
+        case findi f v of SOME _ => true | NONE => false
 
-end                             (* local *)
+    fun alli f v =
+        case findi (not o f) v of SOME _ => false | NONE => true
+
+end
