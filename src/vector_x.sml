@@ -40,8 +40,6 @@ structure VectorX :> VECTOR_X = struct
     structure V = Vector
     fun op //! (x, y) = EasyUnsafe.Vector.sub (x, y)
     infix 8 //!
-    fun op <- (a, (i, x)) = EasyUnsafe.Vector.update (a, i, x)
-    infix 8 <-
     val k = Skicomb.k
     open V
 
@@ -67,17 +65,9 @@ structure VectorX :> VECTOR_X = struct
         end
 
     fun fold_tabulate (n, f, x) =
-        let val cell = ref x
-            val v = vector (n, x)
-            fun loop 0 = ()
-              | loop i =
-                let val i' = n - i
-                in
-                    cell := f (i', !cell)
-                  ; v <- (i', !cell)
-                  ; loop (i - 1)
-                end
-        in v before loop n end
+        let fun setter (v, 0) = f (0, x)
+              | setter (v, i) = f (i, v //! (i - 1))
+        in EasyUnsafe.Vector.create (n, setter) end
 
     fun append (v1, v2) = V.concat [v1, v2]
 

@@ -8,6 +8,9 @@ local
       , "flipflop.sml"
       , "vector_x.sml"
       , "vectorpair.sml"
+      , "list_x.sml"
+      , "choice.sml"
+      , "vector_slice_x.sml"
     ]
 in
     val _ = app use modules
