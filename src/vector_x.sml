@@ -4,11 +4,6 @@
  * modification, are permitted provided that the conditions spelled out in
  * the file LICENSE are met. *)
 
-(* Subscripting operator *)
-
-fun op // (x, y) = Vector.sub (x, y)
-infix 8 //
-
 (* Extra vector functions *)
 
 signature VECTOR_X = sig
@@ -34,27 +29,21 @@ signature VECTOR_X = sig
     val alli : (int * 'a -> bool) -> 'a vector -> bool
 
 end
+    where type 'a vector = 'a Vector.vector
 
 structure VectorX :> VECTOR_X = struct
 
     structure V = Vector
-    fun op //! (x, y) = EasyUnsafe.Vector.sub (x, y)
-    infix 8 //!
     val k = Skicomb.k
     open V
 
     fun vector (n, x) = V.tabulate (n, k x)
 
     fun findi_r f v =
-        let fun loop ~1 = NONE
-              | loop i =
-                let val x = v //! i
-                    val p = (i, x)
-                in
-                    if f p then SOME p else loop (i - 1)
-                end
-            val l = V.length v
-        in loop (l - 1) end
+        let fun check (i, a, b) =
+                let val p = (i, a)
+                in if f p then SOME p else b end
+        in V.foldli check NONE v end
 
     fun find_r f v =
         let fun f' (_, x) = f x
@@ -65,31 +54,23 @@ structure VectorX :> VECTOR_X = struct
         end
 
     fun fold_tabulate (n, f, x) =
-        let fun setter (v, 0) = f (0, x)
-              | setter (v, i) = f (i, v //! (i - 1))
-        in EasyUnsafe.Vector.create (n, setter) end
+        let val cell = ref x
+            fun fold i =
+                let val x' = f (i, !cell)
+                in cell := x'; x' end
+        in tabulate (n, fold) end
 
     fun append (v1, v2) = V.concat [v1, v2]
 
-    fun to_list v =
-        let val l1 = V.length v - 1
-            val res = ref []
-            fun loop ~1 = !res
-              | loop i =
-                ( res := v //! i :: !res
-                ; loop (i - 1) )
-        in loop l1 end
+    fun to_list v = V.foldr (op ::) [] v
 
     fun collate_r f (a1, a2) = 
-        let val (l1, l2) = (V.length a1 - 1, V.length a2 - 1)
-            fun loop (~1, ~1) = EQUAL
-              | loop (~1, j) = LESS
-              | loop (i, ~1) = GREATER
-              | loop (i, j) =
-                case f (a1 //! i, a2 //! j)
-                 of EQUAL => loop (i - 1, j - 1)
-                  | res => res
-        in loop (l1, l2) end
+        let fun compare (x1, x2, EQUAL) = f (x1, x2)
+              | compare (_, _, ord) = ord
+        in case VectorPair.foldr compare EQUAL (a1, a2)
+            of EQUAL => Int.compare (V.length a1, V.length a2)
+             | ord => ord
+        end
 
     fun existsi f v =
         case findi f v of SOME _ => true | NONE => false
@@ -98,3 +79,9 @@ structure VectorX :> VECTOR_X = struct
         case findi (not o f) v of SOME _ => false | NONE => true
 
 end
+
+(* Subscripting operator *)
+
+fun op // (x, y) = Vector.sub (x, y)
+infix 8 //
+

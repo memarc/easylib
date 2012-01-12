@@ -58,83 +58,69 @@ structure VectorPair :> VECTOR_PAIR = struct
     structure V = Vector
     fun op //! (x, y) = EasyUnsafe.Vector.sub (x, y)
     infix 8 //!
-    val id = Skicomb.i          (* identity function *)
+    structure S = VectorSlice
 
     exception UnequalLengths
 
-    fun zipwith (l, f, v, v') = V.tabulate (l, fn i => f (v //! i, v' //! i))
+    fun unzip v = (V.map #1 v, V.map #2 v)
 
-    fun unzip v =
-        let fun vsub i = v //! i
-            val l = V.length v
-        in (V.tabulate (l, #1 o vsub), V.tabulate (l, #2 o vsub)) end
+    (* This is complex because I don't want to use elementwise access
+     * to the input vector(s) due to bounds checking.  PolyML doesn't
+     * export the unsafe indexing functions, and I don't want to copy their
+     * implementations from the PolyML source code. *)
+    fun zipwith (l, v, v') =
+        let val (sl1, sl2) = (S.slice (v, 0, l), S.slice (v', 0, l))
+            fun fold s = S.foldr (op ::) [] s
+            val (l1, l2) = (fold sl1, fold sl2)
+        in V.fromList $ ListPair.zip (l1, l2) end
 
-    fun app' (l, f, v, v') =
-        let fun loop 0 = ()
-              | loop i =
-                let val i' = l - i
-                in f (v //! i', v' //! i'); loop (i - 1) end
-        in loop l end
-
-    fun app f (v, v') =
+    fun zip (v, v') =
         let val (l1, l2) = (V.length v, V.length v')
             val l = Int.min (l1, l2)
-        in app' (l, f, v, v') end
-        
-    fun appEq f (v, v') =
+        in zipwith (SOME l, v, v') end
+
+    fun map f vs = V.map f $ zip vs
+
+    fun zipEq (v, v') = 
         let val (l, l') = (V.length v, V.length v')
         in
             if l <> l' then raise UnequalLengths
-            else app' (l, f, v, v')
+            else zipwith (SOME l, v, v')
         end
 
-    fun map f (v, v') =
-        let val (l1, l2) = (V.length v, V.length v')
-            val l = Int.min (l1, l2)
-        in zipwith (l, f, v, v') end
+    fun mapEq f vs = V.map f $ zipEq vs
 
-    fun zip (v, v') = map id (v, v')
-
-    fun mapEq f (v, v') =
-        let val (l, l') = (V.length v, V.length v')
-        in
-            if l <> l' then raise UnequalLengths
-            else zipwith (l, f, v, v')
-        end
-
-    fun zipEq (v, v') = mapEq id (v, v')
-
-    fun foldli' (l, f, x, v, v') =
-        let fun loop (~1, acc) = acc
-              | loop (i, acc) =
-                let val i' = l - i
-                in loop (i - 1, f (i', v //! i', v' //! i', acc)) end
-        in loop (l, x) end
+    fun foldli' (l, f, x, v1, v2) =
+        let fun loop (NONE, NONE, _, acc) = acc
+              | loop (SOME (y1, s1), SOME (y2, s2), i, acc) = 
+                loop (S.getItem s1, S.getItem s2, i + 1, f (i, y1, y2, acc))
+            val (sl1, sl2) = (S.slice (v1, 0, l), S.slice (v2, 0, l))
+        in loop (S.getItem sl1, S.getItem sl2, 0, x) end
 
     fun foldl f x (v, v') =
         let val (l1, l2) = (V.length v, V.length v')
             val l = Int.min (l1, l2)
             fun f' (_, y, y', z) = f (y, y', z)
-        in foldli' (l - 1, f', x, v, v') end
+        in foldli' (SOME l, f', x, v, v') end
 
     fun foldlEq  f x (v, v') =
         let val (l, l') = (V.length v, V.length v')
             fun f' (_, y, y', z) = f (y, y', z)
         in
             if l <> l' then raise UnequalLengths
-            else foldli' (l - 1, f', x, v, v')
+            else foldli' (SOME l, f', x, v, v')
         end
 
     fun foldli f x (v, v') =
         let val (l1, l2) = (V.length v, V.length v')
             val l = Int.min (l1, l2)
-        in foldli' (l - 1, f, x, v, v') end
+        in foldli' (SOME l, f, x, v, v') end
 
     fun foldliEq  f x (v, v') =
         let val (l, l') = (V.length v, V.length v')
         in
             if l <> l' then raise UnequalLengths
-            else foldli' (l - 1, f, x, v, v')
+            else foldli' (SOME l, f, x, v, v')
         end
 
     fun foldr f x (v, v') =
@@ -166,86 +152,56 @@ structure VectorPair :> VECTOR_PAIR = struct
             else foldri' (l - 1, f, x, v, v')
         end
 
-    fun findi' (l, f, v, v') =
-        let fun loop ~1 = NONE
-              | loop i =
-                let val i' = l - i
-                    val p = (i', v //! i', v' //! i')
-                in
-                    if f p then SOME p
-                    else loop (i - 1)
-                end
-        in loop l end
+    fun app f =
+        let fun act (y, y', _) = f (y, y')
+        in foldl act () end
 
-    fun find f (v, v') =
-        let val (l1, l2) = (V.length v, V.length v')
-            val l = Int.min (l1, l2)
-            fun f' (_, y, y') = f (y, y')
-        in
-            case findi' (l - 1, f', v, v')
-             of NONE => NONE
-              | SOME (i, y, y') => SOME (y, y')
-        end
+    fun appEq f =
+        let fun act (y, y', _) = f (y, y')
+        in foldlEq act () end
 
-    fun findEq  f (v, v') =
-        let val (l, l') = (V.length v, V.length v')
-            fun f' (_, y, y') = f (y, y')
-        in
-            if l <> l' then raise UnequalLengths
-            else case findi' (l - 1, f', v, v')
-                  of NONE => NONE
-                   | SOME (i, y, y') => SOME (y, y')
-        end
+    fun findi f =
+        let fun check (i, y, y', NONE) =
+                let val p = (i, y, y')
+                in if f p then SOME p else NONE end
+              | check (_,_,_,rest) = rest
+        in foldli check NONE end
 
-    fun findi f (v, v') =
-        let val (l1, l2) = (V.length v, V.length v')
-            val l = Int.min (l1, l2)
-        in findi' (l - 1, f, v, v') end
+    fun find f =
+        let fun check (y, y', b) =
+                let val p = (y, y')
+                in if f p then SOME p else b end
+        in foldr check NONE end
 
-    fun findiEq  f (v, v') =
-        let val (l, l') = (V.length v, V.length v')
-        in
-            if l <> l' then raise UnequalLengths
-            else findi' (l - 1, f, v, v')
-        end
+    fun findEq  f =
+        let fun check (y, y', b) =
+                let val p = (y, y')
+                in if f p then SOME p else b end
+        in foldrEq check NONE end
 
-    fun find_r f (v, v') =
-        let val (l1, l2) = (V.length v, V.length v')
-            fun loop (~1, _) = NONE
-              | loop (_, ~1) = NONE
-              | loop (i, j) =
-                let val p = (v //! i, v' //! j)
-                in
-                    if f p then SOME p else loop (i - 1, j - 1)
-                end
-        in loop (l1 - 1, l2 - 1) end
+    fun findiEq  f =
+        let fun check (i, y, y', b) =
+                let val p = (i, y, y')
+                in if f p then SOME p else b end
+        in foldriEq check NONE end
 
-    fun findi_r' (l, f, v, v') =
-        let fun loop ~1 = NONE
-              | loop i =
-                let val p = (i, v //! i, v' //! i)
-                in
-                    if f p then SOME p
-                    else loop (i - 1)
-                end
-        in loop l end
+    fun find_r f =
+        let fun check (y, y', b) =
+                let val p = (y, y')
+                in if f p then SOME p else b end
+        in foldl check NONE end
 
-    fun findEq_r f (v, v') =
-        let val (l, l') = (V.length v, V.length v')
-            fun f' (_, y, y') = f (y, y')
-        in
-            if l <> l' then raise UnequalLengths
-            else case findi_r' (l - 1, f', v, v')
-                  of NONE => NONE
-                   | SOME (_, y, y') => SOME (y, y')
-        end
+    fun findEq_r f =
+        let fun check (y, y', b) =
+                let val p = (y, y')
+                in if f p then SOME p else b end
+        in foldlEq check NONE end
 
-    fun findiEq_r f (v, v') =
-        let val (l, l') = (V.length v, V.length v')
-        in
-            if l <> l' then raise UnequalLengths
-            else findi_r' (l - 1, f, v, v')
-        end
+    fun findiEq_r f =
+        let fun check (i, y, y', b) =
+                let val p = (i, y, y')
+                in if f p then SOME p else b end
+        in foldliEq check NONE end
 
     fun existsi f (v, v') =
         case findi f (v, v') of SOME _ => true | NONE => false

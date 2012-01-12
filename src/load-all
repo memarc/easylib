@@ -6,9 +6,9 @@ local
       , "Unsafe.sml"
       , "skicomb.sml"
       , "flipflop.sml"
-      , "vector_x.sml"
       , "vectorpair.sml"
       , "list_x.sml"
+      , "vector_x.sml"
       , "choice.sml"
       , "vector_slice_x.sml"
     ]
