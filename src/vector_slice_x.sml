@@ -23,6 +23,9 @@ signature VECTOR_SLICE_X = sig
 end
     where type 'a slice = 'a VectorSlice.slice
 
+val op //: = VectorSlice.sub
+infix 8 //:
+
 structure VectorSliceX :> VECTOR_SLICE_X = struct
 
     structure S = VectorSlice
@@ -45,9 +48,16 @@ structure VectorSliceX :> VECTOR_SLICE_X = struct
         end
 
     (* There's no VectorSlicePair, unfortunately. Should there be? *)
-    fun collate_r f (s1, s2) = 
-        let val (v1, v2) = (S.vector s1, S.vector s2)
-        in VectorX.collate_r f (v1, v2) end
+    fun collate_r f (s1, s2) =
+        let val (l1, l2) = (S.length s1, S.length s2)
+            fun loop (~1, ~1) = EQUAL
+              | loop (~1, _) = LESS
+              | loop (_, ~1) = GREATER
+              | loop (i, j)  = 
+                case f (s1 //: i, s2 //: j)
+                 of EQUAL => loop (i - 1, j - 1)
+                  | ord => ord
+        in loop (l1 - 1, l2 - 1) end
 
     fun existsi f v =
         case findi f v of SOME _ => true | NONE => false
@@ -57,5 +67,3 @@ structure VectorSliceX :> VECTOR_SLICE_X = struct
 
 end
 
-val op //: = VectorSlice.sub
-infix 8 //:

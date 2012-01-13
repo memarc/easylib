@@ -10,6 +10,7 @@ local
       , "vector_x.sml"
       , "choice.sml"
       , "vector_slice_x.sml"
+      , "mono_vector_x.sml"
     ]
 in
     val _ = app use modules
