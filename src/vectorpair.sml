@@ -16,6 +16,10 @@ signature VECTOR_PAIR = sig
     val appEq : ('a * 'b -> unit) -> 'a vector * 'b vector -> unit
     val map   : ('a * 'b -> 'c) -> 'a vector * 'b vector -> 'c vector
     val mapEq : ('a * 'b -> 'c) -> 'a vector * 'b vector -> 'c vector
+    val appi   : (int * 'a * 'b -> unit) -> 'a vector * 'b vector -> unit
+    val appiEq : (int * 'a * 'b -> unit) -> 'a vector * 'b vector -> unit
+    val mapi   : (int * 'a * 'b -> 'c) -> 'a vector * 'b vector -> 'c vector
+    val mapiEq : (int * 'a * 'b -> 'c) -> 'a vector * 'b vector -> 'c vector
     val foldl   : ('a * 'b * 'c -> 'c)
                     -> 'c -> 'a vector * 'b vector -> 'c
     val foldr   : ('a * 'b * 'c -> 'c)
@@ -71,24 +75,28 @@ structure VectorPair :> VECTOR_PAIR = struct
      * indexing functions, and I don't want to copy their
      * implementations from the PolyML source code. *)
 
-    fun zipwith (l, v, v') =
-        V.tabulate (l, fn i => (v // i, v' // i))
-
-    fun zip (v, v') =
-        let val (l1, l2) = (V.length v, V.length v')
+    fun zipwith (eq, v1, v2) =
+        let val (l1, l2) = (V.length v1, V.length v2)
             val l = Int.min (l1, l2)
-        in zipwith (l, v, v') end
+        in if l1 <> l2 andalso eq then raise UnequalLengths
+           else V.tabulate (l, fn i => (v1 // i, v2 // i))
+        end
+
+    fun zip (v, v') = zipwith (false, v, v')
 
     fun map f vs = V.map f $ zip vs
 
-    fun zipEq (v, v') = 
-        let val (l, l') = (V.length v, V.length v')
-        in
-            if l <> l' then raise UnequalLengths
-            else zipwith (l, v, v')
-        end
+    fun mapi f vs =
+        let fun f' (i, (y, y')) = f (i, y, y')
+        in V.mapi f' $ zip vs end
+
+    fun zipEq (v, v') = zipwith (true, v, v')
 
     fun mapEq f vs = V.map f $ zipEq vs
+
+    fun mapiEq f vs =
+        let fun f' (i, (y, y')) = f (i, y, y')
+        in V.mapi f' $ zipEq vs end
 
     fun foldli' (eq, f, x, v1, v2) =
         let val (l1, l2) = (V.length v1, V.length v2)
@@ -138,6 +146,14 @@ structure VectorPair :> VECTOR_PAIR = struct
     fun appEq f =
         let fun act (y, y', _) = f (y, y')
         in foldlEq act () end
+
+    fun appi f =
+        let fun act (i, y, y', _) = f (i, y, y')
+        in foldli act () end
+
+    fun appiEq f =
+        let fun act (i, y, y', _) = f (i, y, y')
+        in foldliEq act () end
 
     fun findi f =
         let fun check (i, y, y', NONE) =
