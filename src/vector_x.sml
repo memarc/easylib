@@ -16,8 +16,6 @@ signature VECTOR_X = sig
 
     val findi_r : (int * 'a -> bool) -> 'a vector -> (int * 'a) option
 
-    val fold_tabulate : int * (int * 'a -> 'a) * 'a -> 'a vector
-
     val append : 'a vector * 'a vector -> 'a vector
 
     val to_list : 'a vector -> 'a list
@@ -52,13 +50,6 @@ structure VectorX :> VECTOR_X = struct
              of NONE => NONE
               | SOME (_, x) => SOME x
         end
-
-    fun fold_tabulate (n, f, x) =
-        let val cell = ref x
-            fun fold i =
-                let val x' = f (i, !cell)
-                in cell := x'; x' end
-        in tabulate (n, fold) end
 
     fun append (v1, v2) = V.concat [v1, v2]
 
