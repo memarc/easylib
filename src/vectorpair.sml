@@ -56,28 +56,28 @@ end
 structure VectorPair :> VECTOR_PAIR = struct
 
     structure V = Vector
-    fun op //! (x, y) = EasyUnsafe.Vector.sub (x, y)
-    infix 8 //!
+    fun op // (x, y) = V.sub (x, y)
+    infix 8 //
     structure S = VectorSlice
+    fun op //: (x, y) = S.sub (x, y)
+    infix 8 //:
 
     exception UnequalLengths
 
     fun unzip v = (V.map #1 v, V.map #2 v)
 
-    (* This is complex because I don't want to use elementwise access
-     * to the input vector(s) due to bounds checking.  PolyML doesn't
-     * export the unsafe indexing functions, and I don't want to copy their
+    (* I don't like to use elementwise access to the input vector(s) due
+     * to bounds checking.  But PolyML doesn't export the unsafe
+     * indexing functions, and I don't want to copy their
      * implementations from the PolyML source code. *)
+
     fun zipwith (l, v, v') =
-        let val (sl1, sl2) = (S.slice (v, 0, l), S.slice (v', 0, l))
-            fun fold s = S.foldr (op ::) [] s
-            val (l1, l2) = (fold sl1, fold sl2)
-        in V.fromList $ ListPair.zip (l1, l2) end
+        V.tabulate (l, fn i => (v // i, v' // i))
 
     fun zip (v, v') =
         let val (l1, l2) = (V.length v, V.length v')
             val l = Int.min (l1, l2)
-        in zipwith (SOME l, v, v') end
+        in zipwith (l, v, v') end
 
     fun map f vs = V.map f $ zip vs
 
@@ -85,72 +85,51 @@ structure VectorPair :> VECTOR_PAIR = struct
         let val (l, l') = (V.length v, V.length v')
         in
             if l <> l' then raise UnequalLengths
-            else zipwith (SOME l, v, v')
+            else zipwith (l, v, v')
         end
 
     fun mapEq f vs = V.map f $ zipEq vs
 
-    fun foldli' (l, f, x, v1, v2) =
-        let fun loop (NONE, NONE, _, acc) = acc
-              | loop (SOME (y1, s1), SOME (y2, s2), i, acc) = 
-                loop (S.getItem s1, S.getItem s2, i + 1, f (i, y1, y2, acc))
-            val (sl1, sl2) = (S.slice (v1, 0, l), S.slice (v2, 0, l))
-        in loop (S.getItem sl1, S.getItem sl2, 0, x) end
-
-    fun foldl f x (v, v') =
-        let val (l1, l2) = (V.length v, V.length v')
-            val l = Int.min (l1, l2)
-            fun f' (_, y, y', z) = f (y, y', z)
-        in foldli' (SOME l, f', x, v, v') end
-
-    fun foldlEq  f x (v, v') =
-        let val (l, l') = (V.length v, V.length v')
-            fun f' (_, y, y', z) = f (y, y', z)
-        in
-            if l <> l' then raise UnequalLengths
-            else foldli' (SOME l, f', x, v, v')
+    fun foldli' (eq, f, x, v1, v2) =
+        let val (l1, l2) = (V.length v1, V.length v2)
+            val lopt = SOME (Int.min (l1, l2))
+            val (s1, s2) = (S.slice (v1, 0, lopt), S.slice (v2, 0, lopt))
+            fun f' (i, y, z) = f (i, y, s2 //: i, z)
+        in if l1 <> l2 andalso eq then raise UnequalLengths
+           else S.foldli f' x s1
         end
 
-    fun foldli f x (v, v') =
-        let val (l1, l2) = (V.length v, V.length v')
-            val l = Int.min (l1, l2)
-        in foldli' (SOME l, f, x, v, v') end
+    fun foldl f x (v, v') =
+        let fun f' (_, y, y', z) = f (y, y', z)
+        in foldli' (false, f', x, v, v') end
 
-    fun foldliEq  f x (v, v') =
-        let val (l, l') = (V.length v, V.length v')
-        in
-            if l <> l' then raise UnequalLengths
-            else foldli' (SOME l, f, x, v, v')
+    fun foldlEq  f x (v, v') =
+        let fun f' (_, y, y', z) = f (y, y', z)
+        in foldli' (true, f', x, v, v') end
+
+    fun foldli f x (v, v') = foldli' (false, f, x, v, v')
+
+    fun foldliEq  f x (v, v') = foldli' (true, f, x, v, v')
+
+    fun foldri' (eq, f, x, v1, v2) =
+        let val (l1, l2) = (V.length v1, V.length v2)
+            val l = Int.min (l1, l2)
+            val (s1, s2) =
+                (S.slice (v1, l1 - l, NONE), S.slice (v2, l2 - l, NONE))
+            fun f' (i, y, z) = f (i, y, s2 //: i, z)
+        in if l1 <> l2 andalso eq then raise UnequalLengths
+           else S.foldri f' x s1
         end
 
     fun foldr f x (v, v') =
-        let val (l1, l2) = (V.length v, V.length v')
-            fun loop (~1, _, acc) = acc
-              | loop (_, ~1, acc) = acc
-              | loop (i, j, acc) =
-                loop (i - 1, j - 1, f (v //! i, v' //! j, acc))
-        in loop (l1 - 1, l2 - 1, x) end
-
-    fun foldri' (l, f, x, v, v') =
-        let fun loop (~1, acc) = acc
-              | loop (i, acc) =
-                loop (i - 1, f (i, v //! i, v' //! i, acc))
-        in loop (l, x) end
+        let fun f' (_, y, y', z) = f (y, y', z)
+        in foldri' (false, f', x, v, v') end
 
     fun foldrEq f x (v, v') =
-        let val (l, l') = (V.length v, V.length v')
-            fun f' (_, y, y', z) = f (y, y', z)
-        in
-            if l <> l' then raise UnequalLengths
-            else foldri' (l - 1, f', x, v, v')
-        end
+        let fun f' (_, y, y', z) = f (y, y', z)
+        in foldri' (true, f', x, v, v') end
 
-    fun foldriEq f x (v, v') =
-        let val (l, l') = (V.length v, V.length v')
-        in
-            if l <> l' then raise UnequalLengths
-            else foldri' (l - 1, f, x, v, v')
-        end
+    fun foldriEq f x (v, v') = foldri' (true, f, x, v, v')
 
     fun app f =
         let fun act (y, y', _) = f (y, y')

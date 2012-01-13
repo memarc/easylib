@@ -3,7 +3,6 @@
 local
     val modules = [
         "dotreal.sml"
-      , "Unsafe.sml"
       , "skicomb.sml"
       , "flipflop.sml"
       , "vectorpair.sml"
