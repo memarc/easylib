@@ -1,0 +1,25 @@
+(* emacs: -*-SML-*- *)
+
+structure FS = OS.FileSys
+structure P = OS.Path
+
+fun make () =
+    let val d = FS.openDir "."
+        fun loop () =
+            case FS.readDir d
+             of NONE => ()
+              | SOME f => 
+                let val {base=base, ext=ext} = P.splitBaseExt f
+                in if isSome ext andalso valOf ext = "sml"
+                   then PolyML.make base
+                   else ()
+                 ; loop ()
+                end
+    in loop () handle e => (FS.closeDir d; raise e)
+     ; FS.closeDir d
+    end
+
+val _ = make ()
+
+
+                   

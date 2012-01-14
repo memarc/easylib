@@ -4,18 +4,19 @@
  * modification, are permitted provided that the conditions spelled out in
  * the file LICENSE are met. *)
 
+open GlobalCombinators
+
 functor MonoVectorX (V: MONO_VECTOR) :> MONO_VECTOR_X
     where type elem = V.elem
     where type vector = V.vector = struct
 
-    val k = Skicomb.k
     open V
     val op //! = V.sub 
     infix 8 //!
-    open EasyLoop
+    open VectorSupport
     val filter = Option.filter
 
-    fun vector (n, x) = V.tabulate (n, k x)
+    fun vector (n, x) = V.tabulate (n, konst x)
 
     fun findi_r f v =
         downfrom_until (fn i => filter f (i, v //! i)) $ V.length v
