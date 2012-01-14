@@ -5,6 +5,7 @@ local
         "dotreal.sml"
       , "skicomb.sml"
       , "flipflop.sml"
+      , "loop.sml"
       , "vectorpair.sml"
       , "list_x.sml"
       , "vector_x.sml"

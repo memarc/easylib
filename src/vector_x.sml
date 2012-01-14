@@ -29,50 +29,40 @@ signature VECTOR_X = sig
 end
     where type 'a vector = 'a Vector.vector
 
-structure VectorX :> VECTOR_X = struct
-
-    structure V = Vector
-    val k = Skicomb.k
-    open V
-
-    fun vector (n, x) = V.tabulate (n, k x)
-
-    fun findi_r f v =
-        let fun check (i, a, b) =
-                let val p = (i, a)
-                in if f p then SOME p else b end
-        in V.foldli check NONE v end
-
-    fun find_r f v =
-        let fun f' (_, x) = f x
-        in 
-            case findi_r f' v
-             of NONE => NONE
-              | SOME (_, x) => SOME x
-        end
-
-    fun append (v1, v2) = V.concat [v1, v2]
-
-    fun to_list v = V.foldr (op ::) [] v
-
-    fun collate_r f (a1, a2) = 
-        let fun compare (x1, x2, EQUAL) = f (x1, x2)
-              | compare (_, _, ord) = ord
-        in case VectorPair.foldr compare EQUAL (a1, a2)
-            of EQUAL => Int.compare (V.length a1, V.length a2)
-             | ord => ord
-        end
-
-    fun existsi f v =
-        case findi f v of SOME _ => true | NONE => false
-
-    fun alli f v =
-        case findi (not o f) v of SOME _ => false | NONE => true
-
-end
 
 (* Subscripting operator *)
 
 fun op // (x, y) = Vector.sub (x, y)
 infix 8 //
 
+structure VectorX :> VECTOR_X = struct
+
+    structure V = Vector
+    val k = Skicomb.k
+    open V
+    open EasyLoop
+    val filter = Option.filter
+
+    fun vector (n, x) = V.tabulate (n, k x)
+
+    fun findi_r f v =
+        downfrom_until (fn i => filter f (i, v // i)) $ V.length v
+
+    fun find_r f v =
+        downfrom_until (fn i => filter f (v // i)) $ V.length v
+
+    fun append (v1, v2) = V.concat [v1, v2]
+
+    fun to_list v = V.foldr (op ::) [] v
+
+    fun collate_r f (a1, a2) = 
+        let val ls = (V.length a1, V.length a2)
+            fun check (i, j) =
+                case f (a1 // i, a2 // j) of EQUAL => NONE | ord => SOME ord
+        in getOpt (downfrom_until2 check ls, Int.compare ls) end
+
+    fun existsi f v = isSome $ findi f v
+
+    fun alli f v = not $ isSome $ findi (not o f) v
+
+end

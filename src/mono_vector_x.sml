@@ -34,43 +34,30 @@ functor MonoVectorX (V: MONO_VECTOR) :> MONO_VECTOR_X
     open V
     val op //! = V.sub 
     infix 8 //!
+    open EasyLoop
+    val filter = Option.filter
 
     fun vector (n, x) = V.tabulate (n, k x)
 
     fun findi_r f v =
-        let fun check (i, a, b) =
-                let val p = (i, a)
-                in if f p then SOME p else b end
-        in V.foldli check NONE v end
+        downfrom_until (fn i => filter f (i, v //! i)) $ V.length v
 
     fun find_r f v =
-        let fun f' (_, x) = f x
-        in 
-            case findi_r f' v
-             of NONE => NONE
-              | SOME (_, x) => SOME x
-        end
+        downfrom_until (fn i => filter f (v //! i)) $ V.length v
 
     fun append (v1, v2) = V.concat [v1, v2]
 
     fun to_list v = V.foldr (op ::) [] v
 
     fun collate_r f (a1, a2) = 
-        let val (l1, l2) = (V.length a1, V.length a2)
-            fun loop (~1, ~1) = EQUAL
-              | loop (~1, _) = LESS
-              | loop (_, ~1) = GREATER
-              | loop (i, j)  = 
-                case f (a1 //! i, a2 //! j)
-                 of EQUAL => loop (i - 1, j - 1)
-                  | ord => ord
-        in loop (l1 - 1, l2 - 1) end
+        let val ls = (V.length a1, V.length a2)
+            fun check (i, j) =
+                case f (a1 //! i, a2 //! j) of EQUAL => NONE | ord => SOME ord
+        in getOpt (downfrom_until2 check ls, Int.compare ls) end
 
-    fun existsi f v =
-        case findi f v of SOME _ => true | NONE => false
+    fun existsi f v = isSome $ findi f v 
 
-    fun alli f v =
-        case findi (not o f) v of SOME _ => false | NONE => true
+    fun alli f v = not $ isSome $ findi (not o f) v
 
 end
 
