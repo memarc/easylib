@@ -4,8 +4,6 @@
  * modification, are permitted provided that the conditions spelled out in
  * the file LICENSE are met. *)
 
-open GlobalCombinators
-
 functor MonoVectorX (V: MONO_VECTOR) :> MONO_VECTOR_X
     where type elem = V.elem
     where type vector = V.vector = struct

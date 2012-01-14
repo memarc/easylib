@@ -4,34 +4,31 @@
  * modification, are permitted provided that the conditions spelled out in
  * the file LICENSE are met. *)
 
-structure GlobalCombinators :> GLOBAL_COMBINATORS = struct
+(* Make me a curry! *)
+fun curry f x y = f (x, y)
+(* Eat the curry, and make me a tuple. *)
+fun uncurry f (x, y) = f x y
 
-    (* This is simply the function application.  It is reified like this
-     * to change its precedence and associativity. *)
-    fun $ (f, x) = f x
+(* transform a function by permuting its arguments *)
+fun flip f (x, y) = f (y, x)
 
-    (*  Left section.  For instance, [Array.sub (a, i)] can be written
-     * [$ (<| (a, Array.sub), i)]. *)
-    fun <| (x, f) = fn y => f (x, y)
+(* S, K, I combinators *)
+fun subst z (f, g) = (f z) (g z)
 
-    (* Right section. *)
-    fun |> (f, y) = fn x => f (x, y)
-    (* Make me a curry! *)
-    fun curry f x y = f (x, y)
-    (* Eat the curry, and make me a tuple. *)
-    fun uncurry f (x, y) = f x y
+fun id x = x
 
-    (* transform a function by permuting its arguments *)
-    fun flip f (x, y) = f (y, x)
+fun konst y x = y
 
-    (* S, K, I combinators *)
-    fun subst z (f, g) = (f z) (g z)
+(* This is simply the function application.  It is reified like this
+ * to change its precedence and associativity. *)
+fun op $ (f, x) = f x
 
-    fun id x = x
+(*  Left section.  For instance, [Array.sub (a, i)] can be written
+ * [$ (<| (a, Array.sub), i)]. *)
+fun op <| (x, f) = fn y => f (x, y)
 
-    fun konst y x = y
-
-end
+(* Right section. *)
+fun op |> (f, y) = fn x => f (x, y)
 
 (* See above for the motivation for these *)
 infixr 3 $

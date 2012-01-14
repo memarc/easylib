@@ -7,12 +7,11 @@
 structure VectorX :> VECTOR_X = struct
 
     structure V = Vector
-    val k = Skicomb.k
     open V
-    open EasyLoop
+    open VectorSupport
     val filter = Option.filter
 
-    fun vector (n, x) = V.tabulate (n, k x)
+    fun vector (n, x) = V.tabulate (n, konst x)
 
     fun findi_r f v =
         downfrom_until (fn i => filter f (i, v // i)) $ V.length v

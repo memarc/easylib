@@ -10,6 +10,10 @@ local
         "src"
     ]
 
+    val modules = [
+        "GlobalCombinators.sml"
+    ]
+
     fun build_dir d =
         let val cwd = Fs.getDir ()
             fun print s = T.output (T.stdOut, s)
@@ -25,5 +29,5 @@ local
         let fun is_this_sig s' = (s = s')
         in List.exists is_this_sig (PolyML.Compiler.signatureNames ()) end
 in
-    val _ = app build_dir dirs
+    val _ = ( app use modules ; app build_dir dirs )
 end

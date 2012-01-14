@@ -17,7 +17,6 @@ structure VectorPair :> VECTOR_PAIR = struct
     infix 8 //:
     open VectorSupport
     val filter = Option.filter
-    val id = Skicomb.i
 
     exception UnequalLengths
 
