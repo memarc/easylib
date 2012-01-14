@@ -4,28 +4,6 @@
  * modification, are permitted provided that the conditions spelled out in
  * the file LICENSE are met. *)
 
-signature MONO_VECTOR_X = sig
-
-    include MONO_VECTOR
-
-    val vector : int * elem -> vector
-
-    val find_r : (elem -> bool) -> vector -> elem option
-
-    val findi_r : (int * elem -> bool) -> vector -> (int * elem) option
-
-    val append : vector * vector -> vector
-
-    val to_list : vector -> elem list
-
-    val collate_r : (elem * elem -> order) -> vector * vector -> order
-
-    val existsi : (int * elem -> bool) -> vector -> bool
-
-    val alli : (int * elem -> bool) -> vector -> bool
-
-end
-
 functor MonoVectorX (V: MONO_VECTOR) :> MONO_VECTOR_X
     where type elem = V.elem
     where type vector = V.vector = struct
@@ -60,13 +38,3 @@ functor MonoVectorX (V: MONO_VECTOR) :> MONO_VECTOR_X
     fun alli f v = not $ isSome $ findi (not o f) v
 
 end
-
-structure BoolVectorX = MonoVectorX (BoolVector)
-
-structure IntVectorX = MonoVectorX (IntVector)
-
-structure RealVectorX = MonoVectorX (RealVector)
-
-structure CharVectorX = MonoVectorX (CharVector)
-
-structure Word8VectorX = MonoVectorX (Word8Vector)

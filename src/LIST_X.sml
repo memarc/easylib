@@ -15,22 +15,3 @@ signature LIST_X = sig
     val rec_tabulate : ('a list -> 'a option) -> 'a list
 
 end
-
-structure ListX :> LIST_X = struct
-
-    open List
-
-    fun take_while f [] = []
-      | take_while f (x::xs) =
-        if f x then x :: take_while f xs else []
-
-    fun drop_while f [] = []
-      | drop_while f (l as x::xs) =
-        if f x then drop_while f xs else l
-
-    fun rec_tabulate f =
-        let fun loop l =
-                case f l of NONE => l | SOME x => loop (x :: l)
-        in loop [] end
-
-end
