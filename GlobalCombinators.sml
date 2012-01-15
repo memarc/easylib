@@ -22,17 +22,18 @@ fun konst y x = y
 (* This is simply the function application.  It is reified like this
  * to change its precedence and associativity. *)
 fun op $ (f, x) = f x
+infixr 3 $
+
+(* Right on left application.  Useful for folds. *)
+fun op >$ (x, f) = f x
 
 (*  Left section.  For instance, [Array.sub (a, i)] can be written
  * [$ (<| (a, Array.sub), i)]. *)
 fun op <| (x, f) = fn y => f (x, y)
+infix 4 <| 
 
 (* Right section. *)
 fun op |> (f, y) = fn x => f (x, y)
-
-(* See above for the motivation for these *)
-infixr 3 $
-infix 4 <| 
 infix 4 |>
 
 (* Other global operators *)
