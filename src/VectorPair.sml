@@ -10,15 +10,17 @@
 structure VectorPair :> VECTOR_PAIR = struct
 
     structure V = Vector
-    fun op // (x, y) = V.sub (x, y)
-    infix 8 //
     structure S = VectorSlice
-    fun op //: (x, y) = S.sub (x, y)
-    infix 8 //:
     open VectorSupport
     val filter = Option.filter
 
     exception UnequalLengths
+
+    fun forget3_1 f (_, y, y') = f (y, y')
+    fun forget4_1 f (_, y, y', z) = f (y, y', z)
+    fun forget3_3 f (y, y', z) = f (y, y')
+    fun forget4_4 f (i, y, y', z) = f (i, y, y')
+    fun drop3_1 z = Option.map (forget3_1 id) z
 
     fun unzip v = (V.map #1 v, V.map #2 v)
 
@@ -34,16 +36,11 @@ structure VectorPair :> VECTOR_PAIR = struct
            else V.tabulate (l, fn i => f (i, v1 // i, v2 // i))
         end
 
-    fun zip (v, v') = zipwith (false, id o drop3, v, v')
-
-    fun zipEq (v, v') = zipwith (true, id o drop3, v, v')
-
-    fun map f (v, v') = zipwith (false, f o drop3, v, v')
-
+    fun zip (v, v') = zipwith (false, forget3_1 id, v, v')
+    fun zipEq (v, v') = zipwith (true, forget3_1 id, v, v')
+    fun map f (v, v') = zipwith (false, forget3_1 f, v, v')
     fun mapi f (v, v') = zipwith (false, f, v, v')
-
-    fun mapEq f (v, v') = zipwith (true, f o drop3, v, v')
-
+    fun mapEq f (v, v') = zipwith (true, forget3_1 f, v, v')
     fun mapiEq f (v, v') = zipwith (true, f, v, v')
 
     fun foldli' (eq, f, x, v1, v2) =
@@ -55,12 +52,9 @@ structure VectorPair :> VECTOR_PAIR = struct
            else S.foldli f' x s1
         end
 
-    fun foldl f x (v, v') = foldli' (false, f o drop4, x, v, v')
-
-    fun foldlEq  f x (v, v') = foldli' (true, f o drop4, x, v, v')
-
+    fun foldl f x (v, v') = foldli' (false, forget4_1 f, x, v, v')
+    fun foldlEq  f x (v, v') = foldli' (true, forget4_1 f, x, v, v')
     fun foldli f x (v, v') = foldli' (false, f, x, v, v')
-
     fun foldliEq  f x (v, v') = foldli' (true, f, x, v, v')
 
     fun foldri' (eq, f, x, v1, v2) =
@@ -73,19 +67,14 @@ structure VectorPair :> VECTOR_PAIR = struct
            else S.foldri f' x s1
         end
 
-    fun foldr f x (v, v') = foldri' (false, f o drop4, x, v, v')
-
-    fun foldrEq f x (v, v') = foldri' (true, f o drop4, x, v, v')
-
+    fun foldr f x (v, v') = foldri' (false, forget4_1 f, x, v, v')
+    fun foldrEq f x (v, v') = foldri' (true, forget4_1 f, x, v, v')
     fun foldriEq f x (v, v') = foldri' (true, f, x, v, v')
 
-    fun app f = foldl (f o drop3') ()
-
-    fun appEq f = foldlEq (f o drop3') ()
-
-    fun appi f = foldli (f o drop4') ()
-
-    fun appiEq f = foldliEq (f o drop4') ()
+    fun app f = foldl (forget3_3 f) ()
+    fun appEq f = foldlEq (forget3_3 f) ()
+    fun appi f = foldli (forget4_4 f) ()
+    fun appiEq f = foldliEq (forget4_4 f) ()
 
     fun find' (eq, f, v1, v2) =
         let val (l1, l2) = (V.length v1, V.length v2)
@@ -96,10 +85,8 @@ structure VectorPair :> VECTOR_PAIR = struct
 
     fun findi f (v, v') = find' (false, f, v, v')
 
-    fun find f (v, v') = Option.map drop3 $ find' (false, f o drop3, v, v')
-
-    fun findEq  f (v, v') = Option.map drop3 $ find' (true, f o drop3, v, v')
-
+    fun find f (v, v') = drop3_1 $ find' (false, forget3_1 f, v, v')
+    fun findEq  f (v, v') = drop3_1 $ find' (true, forget3_1 f, v, v')
     fun findiEq  f (v, v') = find' (true, f, v, v')
 
     fun find_r f (v1, v2) =
@@ -113,7 +100,7 @@ structure VectorPair :> VECTOR_PAIR = struct
            else downfrom_until (fn i => filter f (i, v1 // i, v2 // i)) l1
         end
 
-    fun findEq_r f (v, v') = Option.map drop3 $ findiEq_r (f o drop3) (v, v')
+    fun findEq_r f (v, v') = drop3_1 $ findiEq_r (forget3_1 f) (v, v')
 
     fun existsi f (v, v') =
         case findi f (v, v') of SOME _ => true | NONE => false
@@ -122,11 +109,8 @@ structure VectorPair :> VECTOR_PAIR = struct
         case find f (v, v') of SOME _ => true | NONE => false
 
     fun all f (v, v') = not $ isSome $ find (not o f) (v, v')
-
     fun alli f (v, v') = not $ isSome $ findi (not o f) (v, v')
-
     fun allEq f (v, v') = not $ isSome $ findEq (not o f) (v, v')
-
     fun alliEq f (v, v') = not $ isSome $ findiEq (not o f) (v, v')
 
 end
