@@ -10,7 +10,6 @@
 structure VectorPair :> VECTOR_PAIR = struct
 
     structure V = Vector
-    structure S = VectorSlice
     open IterateX
     val flt = Option.filter
     val min = Int.min
@@ -36,55 +35,31 @@ structure VectorPair :> VECTOR_PAIR = struct
            else V.tabulate (min (l1, l2), fn i => f (i, v1 // i, v2 // i))
         end
 
-    fun zip (v, v') = zipwith (false, forget3_1 id, v, v')
-    fun zipEq (v, v') = zipwith (true, forget3_1 id, v, v')
-    fun map f (v, v') = zipwith (false, forget3_1 f, v, v')
-    fun mapi f (v, v') = zipwith (false, f, v, v')
-    fun mapEq f (v, v') = zipwith (true, forget3_1 f, v, v')
-    fun mapiEq f (v, v') = zipwith (true, f, v, v')
-
     fun foldli' (eq, f, x, v1, v2) =
         let val (l1, l2) = (V.length v1, V.length v2)
-            val lopt = SOME (min (l1, l2))
-            val (s1, s2) = (S.slice (v1, 0, lopt), S.slice (v2, 0, lopt))
-            fun f' (i, y, z) = f (i, y, s2 //: i, z)
+            fun f' (i, z) = f (i, v1 // i, v2 // i, z)
         in if l1 <> l2 andalso eq then raise UnequalLengths
-           else S.foldli f' x s1
+           else repeat f' (min (l1, l2)) x
         end
 
-    fun foldl f x (v, v') = foldli' (false, forget4_1 f, x, v, v')
-    fun foldlEq  f x (v, v') = foldli' (true, forget4_1 f, x, v, v')
-    fun foldli f x (v, v') = foldli' (false, f, x, v, v')
-    fun foldliEq  f x (v, v') = foldli' (true, f, x, v, v')
+    fun foldriEq f x (v1, v2) =
+        let val (l1, l2) = (V.length v1, V.length v2)
+            val ` = l1 - 1 <| op -
+        in if l1 <> l2 then raise UnequalLengths
+           else repeat (fn (i, z) => f (`i, v1 // `i, v2 // `i, z)) l1 x
+        end
 
-    fun foldri' (eq, f, x, v1, v2) =
+    fun foldr f x (v1, v2) =
         let val (l1, l2) = (V.length v1, V.length v2)
             val l = min (l1, l2)
-            val (s1, s2) =
-                (S.slice (v1, l1 - l, NONE), S.slice (v2, l2 - l, NONE))
-            fun f' (i, y, z) = f (i, y, s2 //: i, z)
-        in if l1 <> l2 andalso eq then raise UnequalLengths
-           else S.foldri f' x s1
-        end
-
-    fun foldr f x (v, v') = foldri' (false, forget4_1 f, x, v, v')
-    fun foldrEq f x (v, v') = foldri' (true, forget4_1 f, x, v, v')
-    fun foldriEq f x (v, v') = foldri' (true, f, x, v, v')
-    fun app f = foldl (forget3_3 f) ()
-    fun appEq f = foldlEq (forget3_3 f) ()
-    fun appi f = foldli (forget4_4 f) ()
-    fun appiEq f = foldliEq (forget4_4 f) ()
+            fun f' (i, z) = f (v1 // (l1 - 1 - i), v2 // (l2 - 1 - i), z)
+        in repeat f' l x end
 
     fun find' (eq, f, v1, v2) =
         let val (l1, l2) = (V.length v1, V.length v2)
         in if l1 <> l2 andalso eq then raise UnequalLengths
            else upto_until (fn i => flt f (i, v1 // i, v2 // i)) $ min (l1, l2)
         end
-
-    fun findi f (v, v') = find' (false, f, v, v')
-    fun find f (v, v') = drop3_1 $ find' (false, forget3_1 f, v, v')
-    fun findEq  f (v, v') = drop3_1 $ find' (true, forget3_1 f, v, v')
-    fun findiEq  f (v, v') = find' (true, f, v, v')
 
     fun find_r f (v1, v2) =
         let val (l1, l2) = (V.length v1, V.length v2)
@@ -97,6 +72,25 @@ structure VectorPair :> VECTOR_PAIR = struct
            else downfrom_until (fn i => flt f (i, v1 // i, v2 // i)) l1
         end
 
+    fun zip (v, v') = zipwith (false, forget3_1 id, v, v')
+    fun zipEq (v, v') = zipwith (true, forget3_1 id, v, v')
+    fun map f (v, v') = zipwith (false, forget3_1 f, v, v')
+    fun mapi f (v, v') = zipwith (false, f, v, v')
+    fun mapEq f (v, v') = zipwith (true, forget3_1 f, v, v')
+    fun mapiEq f (v, v') = zipwith (true, f, v, v')
+    fun foldl f x (v, v') = foldli' (false, forget4_1 f, x, v, v')
+    fun foldlEq  f x (v, v') = foldli' (true, forget4_1 f, x, v, v')
+    fun foldli f x (v, v') = foldli' (false, f, x, v, v')
+    fun foldliEq  f x (v, v') = foldli' (true, f, x, v, v')
+    fun foldrEq f x (v, v') = foldriEq (forget4_1 f) x (v, v')
+    fun app f = foldl (forget3_3 f) ()
+    fun appEq f = foldlEq (forget3_3 f) ()
+    fun appi f = foldli (forget4_4 f) ()
+    fun appiEq f = foldliEq (forget4_4 f) ()
+    fun findi f (v, v') = find' (false, f, v, v')
+    fun find f (v, v') = drop3_1 $ find' (false, forget3_1 f, v, v')
+    fun findEq  f (v, v') = drop3_1 $ find' (true, forget3_1 f, v, v')
+    fun findiEq  f (v, v') = find' (true, f, v, v')
     fun findEq_r f (v, v') = drop3_1 $ findiEq_r (forget3_1 f) (v, v')
     fun existsi f (v, v') = isSome $ findi f (v, v')
     fun exists f (v, v') = isSome $ find f (v, v')
