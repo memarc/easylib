@@ -12,7 +12,8 @@ structure VectorPair :> VECTOR_PAIR = struct
     structure V = Vector
     structure S = VectorSlice
     open VectorSupport
-    val filter = Option.filter
+    val flt = Option.filter
+    val min = Int.min
 
     exception UnequalLengths
 
@@ -31,9 +32,8 @@ structure VectorPair :> VECTOR_PAIR = struct
 
     fun zipwith (eq, f, v1, v2) =
         let val (l1, l2) = (V.length v1, V.length v2)
-            val l = Int.min (l1, l2)
         in if l1 <> l2 andalso eq then raise UnequalLengths
-           else V.tabulate (l, fn i => f (i, v1 // i, v2 // i))
+           else V.tabulate (min (l1, l2), fn i => f (i, v1 // i, v2 // i))
         end
 
     fun zip (v, v') = zipwith (false, forget3_1 id, v, v')
@@ -45,7 +45,7 @@ structure VectorPair :> VECTOR_PAIR = struct
 
     fun foldli' (eq, f, x, v1, v2) =
         let val (l1, l2) = (V.length v1, V.length v2)
-            val lopt = SOME (Int.min (l1, l2))
+            val lopt = SOME (min (l1, l2))
             val (s1, s2) = (S.slice (v1, 0, lopt), S.slice (v2, 0, lopt))
             fun f' (i, y, z) = f (i, y, s2 //: i, z)
         in if l1 <> l2 andalso eq then raise UnequalLengths
@@ -59,7 +59,7 @@ structure VectorPair :> VECTOR_PAIR = struct
 
     fun foldri' (eq, f, x, v1, v2) =
         let val (l1, l2) = (V.length v1, V.length v2)
-            val l = Int.min (l1, l2)
+            val l = min (l1, l2)
             val (s1, s2) =
                 (S.slice (v1, l1 - l, NONE), S.slice (v2, l2 - l, NONE))
             fun f' (i, y, z) = f (i, y, s2 //: i, z)
@@ -77,9 +77,8 @@ structure VectorPair :> VECTOR_PAIR = struct
 
     fun find' (eq, f, v1, v2) =
         let val (l1, l2) = (V.length v1, V.length v2)
-            val l = Int.min (l1, l2)
         in if l1 <> l2 andalso eq then raise UnequalLengths
-           else upto_until (fn i => filter f (i, v1 // i, v2 // i)) l
+           else upto_until (fn i => flt f (i, v1 // i, v2 // i)) $ min (l1, l2)
         end
 
     fun findi f (v, v') = find' (false, f, v, v')
@@ -89,13 +88,13 @@ structure VectorPair :> VECTOR_PAIR = struct
 
     fun find_r f (v1, v2) =
         let val (l1, l2) = (V.length v1, V.length v2)
-            fun check (i, j) = filter f (v1 // i, v2 // j)
+            fun check (i, j) = flt f (v1 // i, v2 // j)
         in downfrom_until2 check (l1, l2) end
 
     fun findiEq_r f (v1, v2) =
         let val (l1, l2) = (V.length v1, V.length v2)
         in if l1 <> l2 then raise UnequalLengths
-           else downfrom_until (fn i => filter f (i, v1 // i, v2 // i)) l1
+           else downfrom_until (fn i => flt f (i, v1 // i, v2 // i)) l1
         end
 
     fun findEq_r f (v, v') = drop3_1 $ findiEq_r (forget3_1 f) (v, v')
