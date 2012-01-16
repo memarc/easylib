@@ -7,8 +7,8 @@ local
 
     (* order is important - dependencies *)
     val dirs =
-        [ "src"
-        , "Util"
+        [ "Util"
+        , "src"
         ]
 
     val modules =
