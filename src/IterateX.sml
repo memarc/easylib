@@ -7,22 +7,17 @@
 structure IterateX :> ITERATE_X =
 struct
     open Iterate
-    
-    fun upto_until f n =
+
+    fun find (f, n) =
         let exception Found of 'a
             fun f' (i, _) = Option.map (fn v => raise Found v) $ f i
         in repeat f' n NONE handle Found v => SOME v end
+    
+    fun upto_until f n = find (f, n)
 
-    fun downfrom_until f n =
-        let exception Found of 'a
-            fun f'' i = f (n - i - 1)
-            fun f' (i, _) = Option.map (fn v => raise Found v) $ f'' i
-        in repeat f' n NONE handle Found v => SOME v end
+    fun downfrom_until f n = find (fn i => f (n - 1 - i), n)
 
     fun downfrom_until2 f (m, n) =
-        let exception Found of 'a
-            fun f'' i = f (m - i - 1, n - i - 1)
-            fun f' (i, _) = Option.map (fn v => raise Found v) $ f'' i
-        in repeat f' (Int.min (m, n)) NONE handle Found v => SOME v end
+        let fun f' i = f (m - 1 - i, n - 1 - i) in find (f', Int.min (m, n)) end
 
 end
