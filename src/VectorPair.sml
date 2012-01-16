@@ -70,7 +70,6 @@ structure VectorPair :> VECTOR_PAIR = struct
     fun foldr f x (v, v') = foldri' (false, forget4_1 f, x, v, v')
     fun foldrEq f x (v, v') = foldri' (true, forget4_1 f, x, v, v')
     fun foldriEq f x (v, v') = foldri' (true, f, x, v, v')
-
     fun app f = foldl (forget3_3 f) ()
     fun appEq f = foldlEq (forget3_3 f) ()
     fun appi f = foldli (forget4_4 f) ()
@@ -84,7 +83,6 @@ structure VectorPair :> VECTOR_PAIR = struct
         end
 
     fun findi f (v, v') = find' (false, f, v, v')
-
     fun find f (v, v') = drop3_1 $ find' (false, forget3_1 f, v, v')
     fun findEq  f (v, v') = drop3_1 $ find' (true, forget3_1 f, v, v')
     fun findiEq  f (v, v') = find' (true, f, v, v')
@@ -101,13 +99,8 @@ structure VectorPair :> VECTOR_PAIR = struct
         end
 
     fun findEq_r f (v, v') = drop3_1 $ findiEq_r (forget3_1 f) (v, v')
-
-    fun existsi f (v, v') =
-        case findi f (v, v') of SOME _ => true | NONE => false
-
-    fun exists f (v, v') =
-        case find f (v, v') of SOME _ => true | NONE => false
-
+    fun existsi f (v, v') = isSome $ findi f (v, v')
+    fun exists f (v, v') = isSome $ find f (v, v')
     fun all f (v, v') = not $ isSome $ find (not o f) (v, v')
     fun alli f (v, v') = not $ isSome $ findi (not o f) (v, v')
     fun allEq f (v, v') = not $ isSome $ findEq (not o f) (v, v')
