@@ -36,6 +36,10 @@ infix 4 <|
 fun op |> (f, y) = fn x => f (x, y)
 infix 4 |>
 
+(* defined in Product module *)
+val op & = Product.&
+infix 0 &
+
 (* Other global operators *)
 val op // = Vector.sub
 infix 8 //

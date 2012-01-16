@@ -12,7 +12,9 @@ local
         ]
 
     val modules =
-        [ "GlobalCombinators.sml"
+        [ "PRODUCT.sml"
+        , "Product.sml"
+        , "GlobalCombinators.sml"
         ]
 
     fun build_dir d =
@@ -20,9 +22,9 @@ local
             fun print s = T.output (T.stdOut, s)
         in
             Fs.chDir d
-          ; map print ["\n", "Entering directory `", cwd, "/", d, "'\n"]
+          ; app print ["\n", "Entering directory `", cwd, "/", d, "'\n"]
           ; use "load-all" handle _ => P.exit P.failure
-          ; map print ["\n", "Leaving directory `", cwd, "/", d, "'\n"]
+          ; app print ["\n", "Leaving directory `", cwd, "/", d, "'\n"]
           ; Fs.chDir cwd
         end
 
