@@ -6,13 +6,27 @@
 
 (* If these functions exists for lists, they should exist for vectors. *)
 
-
-structure VectorPair :> VECTOR_PAIR = struct
+functor MonoVectorPair (structure L: MONO_VECTOR; structure R: MONO_VECTOR)
+        :> MONO_VECTOR_PAIR
+           where type lelem = L.elem
+           where type lvector = L.vector
+           where type relem = R.elem
+           where type rvector = R.vector =
+struct
 
     structure V = Vector
     open IterateX
     val flt = Option.filter
     val min = Int.min
+    val op `/ = L.sub
+    infix 8 `/
+    val op /` = R.sub         
+    infix 8 /`
+
+    type lelem = L.elem
+    type relem = R.elem
+    type lvector = L.vector
+    type rvector = R.vector
 
     exception UnequalLengths
 
@@ -22,7 +36,12 @@ structure VectorPair :> VECTOR_PAIR = struct
     fun forgeta4 f (i, y, y', _) = f (i, y, y')
     fun dropi z = Option.map (forgeti3 id) z
 
-    fun unzip v = (V.map #1 v, V.map #2 v)
+    fun unzip v =
+        let val l = V.length v
+        in ( L.tabulate (l, fn i => #1 $ v // i)
+           , R.tabulate (l, fn i => #2 $ v // i)
+           )
+        end
 
     (* I don't like to use elementwise access to the input vector(s) due
      * to bounds checking.  But PolyML doesn't export the unsafe
@@ -30,46 +49,46 @@ structure VectorPair :> VECTOR_PAIR = struct
      * implementations from the PolyML source code. *)
 
     fun zipwith (eq, f, v1, v2) =
-        let val (l1, l2) = (V.length v1, V.length v2)
+        let val (l1, l2) = (L.length v1, R.length v2)
         in if l1 <> l2 andalso eq then raise UnequalLengths
-           else V.tabulate (min (l1, l2), fn i => f (i, v1 // i, v2 // i))
+           else V.tabulate (min (l1, l2), fn i => f (i, v1 `/ i, v2 /` i))
         end
 
     fun foldli' (eq, f, x, v1, v2) =
-        let val (l1, l2) = (V.length v1, V.length v2)
-            fun f' (i, z) = f (i, v1 // i, v2 // i, z)
+        let val (l1, l2) = (L.length v1, R.length v2)
+            fun f' (i, z) = f (i, v1 `/ i, v2 /` i, z)
         in if l1 <> l2 andalso eq then raise UnequalLengths
            else repeat f' (min (l1, l2)) x
         end
 
     fun foldriEq f x (v1, v2) =
-        let val (l1, l2) = (V.length v1, V.length v2)
+        let val (l1, l2) = (L.length v1, R.length v2)
             fun `i = l1 - 1 - i
         in if l1 <> l2 then raise UnequalLengths
-           else repeat (fn (i, z) => f (`i, v1 // `i, v2 // `i, z)) l1 x
+           else repeat (fn (i, z) => f (`i, v1 `/ `i, v2 /` `i, z)) l1 x
         end
 
     fun foldr f x (v1, v2) =
-        let val (l1, l2) = (V.length v1, V.length v2)
+        let val (l1, l2) = (L.length v1, R.length v2)
             val l = min (l1, l2)
-            fun f' (i, z) = f (v1 // (l1 - 1 - i), v2 // (l2 - 1 - i), z)
+            fun f' (i, z) = f (v1 `/ (l1 - 1 - i), v2 /` (l2 - 1 - i), z)
         in repeat f' l x end
 
     fun find' (eq, f, v1, v2) =
-        let val (l1, l2) = (V.length v1, V.length v2)
+        let val (l1, l2) = (L.length v1, R.length v2)
         in if l1 <> l2 andalso eq then raise UnequalLengths
-           else upto_until (fn i => flt f (i, v1 // i, v2 // i)) $ min (l1, l2)
+           else upto_until (fn i => flt f (i, v1 `/ i, v2 /` i)) $ min (l1, l2)
         end
 
     fun find_r f (v1, v2) =
-        let val (l1, l2) = (V.length v1, V.length v2)
-            fun check (i, j) = flt f (v1 // i, v2 // j)
+        let val (l1, l2) = (L.length v1, R.length v2)
+            fun check (i, j) = flt f (v1 `/ i, v2 /` j)
         in downfrom_until2 check (l1, l2) end
 
     fun findiEq_r f (v1, v2) =
-        let val (l1, l2) = (V.length v1, V.length v2)
+        let val (l1, l2) = (L.length v1, R.length v2)
         in if l1 <> l2 then raise UnequalLengths
-           else downfrom_until (fn i => flt f (i, v1 // i, v2 // i)) l1
+           else downfrom_until (fn i => flt f (i, v1 `/ i, v2 /` i)) l1
         end
 
     fun zip (v, v') = zipwith (false, forgeti3 id, v, v')
