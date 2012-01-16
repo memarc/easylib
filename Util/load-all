@@ -1,0 +1,12 @@
+(* emacs: -*-SML-*- *)
+
+local 
+    val modules =
+        [ "lib-base-sig.sml"
+        , "lib-base.sml"
+        , "iterate-sig.sml"
+        , "iterate.sml"
+        ]
+in 
+    val _ = app use modules
+end

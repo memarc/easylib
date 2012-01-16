@@ -6,13 +6,14 @@ local
     structure T = TextIO
 
     (* order is important - dependencies *)
-    val dirs = [
-        "src"
-    ]
+    val dirs =
+        [ "src"
+        , "Util"
+        ]
 
-    val modules = [
-        "GlobalCombinators.sml"
-    ]
+    val modules =
+        [ "GlobalCombinators.sml"
+        ]
 
     fun build_dir d =
         let val cwd = Fs.getDir ()
