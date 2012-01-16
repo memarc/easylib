@@ -11,7 +11,7 @@ functor MonoVectorX (V: MONO_VECTOR) :> MONO_VECTOR_X
     open V
     val op //! = V.sub 
     infix 8 //!
-    open VectorSupport
+    open IterateX
     val filter = Option.filter
 
     fun vector (n, x) = V.tabulate (n, konst x)

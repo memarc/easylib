@@ -8,7 +8,7 @@ structure VectorX :> VECTOR_X = struct
 
     structure V = Vector
     open V
-    open VectorSupport
+    open IterateX
     val filter = Option.filter
 
     fun vector (n, x) = V.tabulate (n, konst x)

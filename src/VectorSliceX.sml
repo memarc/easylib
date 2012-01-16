@@ -11,7 +11,7 @@ structure VectorSliceX :> VECTOR_SLICE_X = struct
 
     structure S = VectorSlice
     open S
-    open VectorSupport
+    open IterateX
     val filter = Option.filter
 
     fun append (s, s') = concat [s, s']

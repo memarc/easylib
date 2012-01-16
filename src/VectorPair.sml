@@ -11,7 +11,7 @@ structure VectorPair :> VECTOR_PAIR = struct
 
     structure V = Vector
     structure S = VectorSlice
-    open VectorSupport
+    open IterateX
     val flt = Option.filter
     val min = Int.min
 
@@ -19,8 +19,8 @@ structure VectorPair :> VECTOR_PAIR = struct
 
     fun forget3_1 f (_, y, y') = f (y, y')
     fun forget4_1 f (_, y, y', z) = f (y, y', z)
-    fun forget3_3 f (y, y', z) = f (y, y')
-    fun forget4_4 f (i, y, y', z) = f (i, y, y')
+    fun forget3_3 f (y, y', _) = f (y, y')
+    fun forget4_4 f (i, y, y', _) = f (i, y, y')
     fun drop3_1 z = Option.map (forget3_1 id) z
 
     fun unzip v = (V.map #1 v, V.map #2 v)
