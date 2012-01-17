@@ -18,7 +18,7 @@ signature VECTOR_X = sig
 
     val append : 'a vector * 'a vector -> 'a vector
 
-    val to_list : 'a vector -> 'a list
+    val toList : 'a vector -> 'a list
 
     val collate_r : ('a * 'a -> order) -> 'a vector * 'a vector -> order
 

@@ -21,7 +21,7 @@ structure VectorX :> VECTOR_X = struct
 
     fun append (v1, v2) = V.concat [v1, v2]
 
-    fun to_list v = V.foldr (op ::) [] v
+    fun toList v = V.foldr (op ::) [] v
 
     fun collate_r f (a1, a2) = 
         let val ls = (V.length a1, V.length a2)
