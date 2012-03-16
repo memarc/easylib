@@ -25,23 +25,20 @@ struct
             val dl = l2 - l1
         in dl >= 0 andalso V.alli (fn (i, y) => v2 // (dl + i) = y) v1 end
 
-    fun findTail (ls, v) =
-        let val lv = V.length v
-            val s = S.slice (v, lv - ls, SOME ls)
-            fun match ~1 = NONE
-              | match i =
-                if S.alli (fn (j, y) => v // (i + j) = y) s then SOME i
-                else match (i - 1)
-        in match (lv - ls - 1) end
-
     fun isSub v1 v2 =
         let val (l1, l2) = (V.length v1, V.length v2)
+            fun findPat ls =
+                let val lv = V.length v1
+                    val s = S.slice (v1, lv - ls, SOME ls)
+                    fun match ~1 = NONE
+                      | match i =
+                        if S.alli (fn (j, y) => v1 // (i + j) = y) s then SOME i
+                        else match (i - 1)
+                in match (lv - ls - 1) end
             fun step [] = SOME (l1 - 1, 1)
               | step ((~1, _) :: _) = NONE
               | step ((i, j) :: _) =
-                let val m = case findTail (l1 - i, v1) of
-                                NONE => 1
-                              | SOME k => i - k 
+                let val m = case findPat (l1 - i) of NONE => i + 1 | SOME k => i - k
                 in SOME (i - 1, Int.max (j, m)) end
             val nexttbl = V.fromList $ List.map #2 (ListX.tabulateRec step)
             fun check i =
