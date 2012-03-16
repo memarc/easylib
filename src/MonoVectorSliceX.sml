@@ -22,6 +22,8 @@ struct
 
     fun append (s, s') = concat [s, s']
 
+    fun concatWith sep vs = concat $ ListX.intersperse (full sep) vs
+
     fun findi_r f v =
         downfrom_until (fn i => filter f (i, v //! i)) $ S.length v
 
@@ -38,6 +40,29 @@ struct
     fun existsi f v = isSome $ findi f v
 
     fun alli f v = not $ isSome $ findi (not o f) v
+
+    fun tokens p s =
+        let fun mksl (i, l) = subslice (s, i, SOME l)
+            fun prepend (i, x, []) = if p x then [] else [mksl (i, 1)]
+              | prepend (i, x, toks as s :: ss) =
+                if p x then toks else
+                let val (_, j, l) = base s in
+                    if i < j - 1 then mksl (i, 1) :: toks
+                    else mksl (i, l + 1) :: ss
+                end
+        in foldri prepend [] s end
+
+    fun fields p s =
+        let fun mksl (i, l) = subslice (s, i, SOME l)
+            fun prepend (x, []) =
+                if p x then [mksl (length s, 0)]
+                else [mksl (length s - 1, 1)]
+              | prepend (x, flds as s :: ss) =
+                let val (_, j, l) = base s in
+                    if p x then mksl (j - 1, 0) :: flds
+                    else mksl (j - 1, l + 1) :: ss
+                end
+        in foldr prepend [] s end
 
 end
 

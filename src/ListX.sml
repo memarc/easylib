@@ -22,4 +22,9 @@ structure ListX :> LIST_X = struct
                 case f l of NONE => l | SOME x => loop (x :: l)
         in loop [] end
 
+    fun intersperse sep l =
+        let fun prepend (y, []) = [y]
+              | prepend (y, xs) = y :: sep :: xs
+        in foldr prepend [] l end
+
 end

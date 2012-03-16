@@ -13,5 +13,6 @@ signature LIST_X = sig
     val take_while : ('a -> bool) -> 'a list -> 'a list
     val drop_while : ('a -> bool) -> 'a list -> 'a list
     val rec_tabulate : ('a list -> 'a option) -> 'a list
+    val intersperse: 'a -> 'a list -> 'a list
 
 end

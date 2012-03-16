@@ -10,6 +10,7 @@ signature VECTOR_SLICE_X = sig
 
     val append : 'a slice * 'a slice -> 'a Vector.vector
 
+    val concatWith: 'a Vector.vector -> 'a slice list -> 'a Vector.vector
 
     val findi_r : (int * 'a -> bool)
                   -> 'a slice -> (int * 'a) option
@@ -18,6 +19,9 @@ signature VECTOR_SLICE_X = sig
     val alli : (int * 'a -> bool) -> 'a slice -> bool
     val collate_r : ('a * 'a -> order)
                     -> 'a slice * 'a slice -> order
+    val tokens: ('a -> bool) -> 'a slice -> 'a slice list
+    val fields: ('a -> bool) -> 'a slice -> 'a slice list
+
 end
     where type 'a slice = 'a VectorSlice.slice
 

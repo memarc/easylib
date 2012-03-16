@@ -10,6 +10,7 @@ signature MONO_VECTOR_SLICE_X = sig
 
     val append : slice * slice -> vector
 
+    val concatWith: vector -> slice list -> vector
 
     val findi_r : (int * elem -> bool)
                   -> slice -> (int * elem) option
@@ -18,4 +19,7 @@ signature MONO_VECTOR_SLICE_X = sig
     val alli : (int * elem -> bool) -> slice -> bool
     val collate_r : (elem * elem -> order)
                     -> slice * slice -> order
+    val tokens: (elem -> bool) -> slice -> slice list
+    val fields: (elem -> bool) -> slice -> slice list
+
 end

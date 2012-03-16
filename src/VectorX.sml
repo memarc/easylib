@@ -33,4 +33,8 @@ structure VectorX :> VECTOR_X = struct
 
     fun alli f v = not $ isSome $ findi (not o f) v
 
+    fun concatWith sep vs = concat $ ListX.intersperse sep vs
+
+    fun translate f v = concat $ List.map f (toList v)
+
 end

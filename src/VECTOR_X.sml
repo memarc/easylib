@@ -12,6 +12,10 @@ signature VECTOR_X = sig
 
     val vector : int * 'a -> 'a vector
 
+    val concatWith : 'a vector -> 'a vector list -> 'a vector
+
+    val translate: ('a -> 'a vector) -> 'a vector -> 'a vector
+
     val find_r : ('a -> bool) -> 'a vector -> 'a option
 
     val findi_r : (int * 'a -> bool) -> 'a vector -> (int * 'a) option

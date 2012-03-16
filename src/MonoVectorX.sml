@@ -24,7 +24,7 @@ functor MonoVectorX (V: MONO_VECTOR) :> MONO_VECTOR_X
 
     fun append (v1, v2) = V.concat [v1, v2]
 
-    fun to_list v = V.foldr (op ::) [] v
+    fun toList v = V.foldr (op ::) [] v
 
     fun collate_r f (a1, a2) = 
         let val ls = (V.length a1, V.length a2)
@@ -35,5 +35,9 @@ functor MonoVectorX (V: MONO_VECTOR) :> MONO_VECTOR_X
     fun existsi f v = isSome $ findi f v 
 
     fun alli f v = not $ isSome $ findi (not o f) v
+
+    fun concatWith sep vs = concat $ ListX.intersperse sep vs
+
+    fun translate f v = concat $ List.map f (toList v)
 
 end
