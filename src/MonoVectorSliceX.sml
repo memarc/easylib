@@ -42,25 +42,28 @@ struct
     fun alli f v = not $ isSome $ findi (not o f) v
 
     fun tokens p s =
-        let fun mksl (i, l) = subslice (s, i, SOME l)
+        let val (_, i0, _) = base s
+            fun mksl (i, l) = subslice (s, i, SOME l)
             fun prepend (i, x, []) = if p x then [] else [mksl (i, 1)]
-              | prepend (i, x, toks as s :: ss) =
+              | prepend (i, x, toks as t :: ts) =
                 if p x then toks else
-                let val (_, j, l) = base s in
-                    if i < j - 1 then mksl (i, 1) :: toks
-                    else mksl (i, l + 1) :: ss
+                let val (_, j, l) = base t in
+                    if i0 + i < j - 1 then mksl (i, 1) :: toks
+                    else mksl (i, l + 1) :: ts
                 end
         in foldri prepend [] s end
 
     fun fields p s =
-        let fun mksl (i, l) = subslice (s, i, SOME l)
+        let val (_, i0, l0) = base s
+            fun mksl (i, l) = subslice (s, i, SOME l)
             fun prepend (x, []) =
-                if p x then [mksl (length s, 0)]
-                else [mksl (length s - 1, 1)]
-              | prepend (x, flds as s :: ss) =
-                let val (_, j, l) = base s in
-                    if p x then mksl (j - 1, 0) :: flds
-                    else mksl (j - 1, l + 1) :: ss
+                if p x then [mksl (l0, 0)]
+                else [mksl (l0 - 1, 1)]
+              | prepend (x, flds as f :: fs) =
+                let val (_, j, l) = base f
+                    val j' = j - i0 - 1
+                in
+                    if p x then mksl (j', 0) :: flds else mksl (j', l + 1) :: fs
                 end
         in foldr prepend [] s end
 
