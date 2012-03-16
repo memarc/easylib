@@ -58,18 +58,18 @@ structure VectorPair :> VECTOR_PAIR = struct
     fun find' (eq, f, v1, v2) =
         let val (l1, l2) = (V.length v1, V.length v2)
         in if l1 <> l2 andalso eq then raise UnequalLengths
-           else upto_until (fn i => flt f (i, v1 // i, v2 // i)) $ min (l1, l2)
+           else uptoUntil (fn i => flt f (i, v1 // i, v2 // i)) $ min (l1, l2)
         end
 
-    fun find_r f (v1, v2) =
+    fun rfind f (v1, v2) =
         let val (l1, l2) = (V.length v1, V.length v2)
             fun check (i, j) = flt f (v1 // i, v2 // j)
-        in downfrom_until2 check (l1, l2) end
+        in downfromUntil2 check (l1, l2) end
 
-    fun findiEq_r f (v1, v2) =
+    fun rfindiEq f (v1, v2) =
         let val (l1, l2) = (V.length v1, V.length v2)
         in if l1 <> l2 then raise UnequalLengths
-           else downfrom_until (fn i => flt f (i, v1 // i, v2 // i)) l1
+           else downfromUntil (fn i => flt f (i, v1 // i, v2 // i)) l1
         end
 
     fun zip (v, v') = zipwith (false, forgeti3 id, v, v')
@@ -91,7 +91,7 @@ structure VectorPair :> VECTOR_PAIR = struct
     fun find f (v, v') = dropi $ find' (false, forgeti3 f, v, v')
     fun findEq  f (v, v') = dropi $ find' (true, forgeti3 f, v, v')
     fun findiEq  f (v, v') = find' (true, f, v, v')
-    fun findEq_r f (v, v') = dropi $ findiEq_r (forgeti3 f) (v, v')
+    fun rfindEq f (v, v') = dropi $ rfindiEq (forgeti3 f) (v, v')
     fun existsi f (v, v') = isSome $ findi f (v, v')
     fun exists f (v, v') = isSome $ find f (v, v')
     fun all f (v, v') = not $ isSome $ find (not o f) (v, v')

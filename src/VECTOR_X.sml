@@ -16,15 +16,15 @@ signature VECTOR_X = sig
 
     val translate: ('a -> 'a vector) -> 'a vector -> 'a vector
 
-    val find_r : ('a -> bool) -> 'a vector -> 'a option
+    val rfind : ('a -> bool) -> 'a vector -> 'a option
 
-    val findi_r : (int * 'a -> bool) -> 'a vector -> (int * 'a) option
+    val rfindi : (int * 'a -> bool) -> 'a vector -> (int * 'a) option
 
     val append : 'a vector * 'a vector -> 'a vector
 
     val toList : 'a vector -> 'a list
 
-    val collate_r : ('a * 'a -> order) -> 'a vector * 'a vector -> order
+    val rcollate : ('a * 'a -> order) -> 'a vector * 'a vector -> order
 
     val existsi : (int * 'a -> bool) -> 'a vector -> bool
 

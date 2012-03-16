@@ -12,12 +12,12 @@ signature MONO_VECTOR_SLICE_X = sig
 
     val concatWith: vector -> slice list -> vector
 
-    val findi_r : (int * elem -> bool)
+    val rfindi : (int * elem -> bool)
                   -> slice -> (int * elem) option
-    val find_r  : (elem -> bool) -> slice -> elem option
+    val rfind  : (elem -> bool) -> slice -> elem option
     val existsi : (int * elem -> bool) -> slice -> bool
     val alli : (int * elem -> bool) -> slice -> bool
-    val collate_r : (elem * elem -> order)
+    val rcollate : (elem * elem -> order)
                     -> slice * slice -> order
     val tokens: (elem -> bool) -> slice -> slice list
     val fields: (elem -> bool) -> slice -> slice list

@@ -13,11 +13,11 @@ struct
             fun f' (i, _) = Option.map (fn v => raise Found v) $ f i
         in repeat f' n NONE handle Found v => SOME v end
     
-    fun upto_until f n = find (f, n)
+    fun uptoUntil f n = find (f, n)
 
-    fun downfrom_until f n = find (fn i => f (n - 1 - i), n)
+    fun downfromUntil f n = find (fn i => f (n - 1 - i), n)
 
-    fun downfrom_until2 f (m, n) =
+    fun downfromUntil2 f (m, n) =
         let fun f' i = f (m - 1 - i, n - 1 - i) in find (f', Int.min (m, n)) end
 
 end

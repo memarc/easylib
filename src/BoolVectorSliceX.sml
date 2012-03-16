@@ -74,9 +74,9 @@ struct
 
     fun app f s = foldl (f o #1) () s
 
-    fun findi f s = upto_until (fn i => filter f (i, s //! i)) $ length s
+    fun findi f s = uptoUntil (fn i => filter f (i, s //! i)) $ length s
 
-    fun find f s = upto_until (fn i => filter f (s //! i)) $ length s
+    fun find f s = uptoUntil (fn i => filter f (s //! i)) $ length s
 
     fun exists f s = isSome $ find f s
 
@@ -86,7 +86,7 @@ struct
         let fun check i =
                 case f (s1 //! i, s2 //! i) of EQUAL => NONE | ord => SOME ord
             val ls = (l1, l2)
-        in getOpt (upto_until check (Int.min ls), Int.compare ls) end
+        in getOpt (uptoUntil check (Int.min ls), Int.compare ls) end
 
     fun foldri f x (s as {len=l,...}) =
         let fun `i = l - 1 - i
@@ -95,18 +95,18 @@ struct
     fun foldr f x (s as {len=l,...}) =
         repeat (fn (i, v) => f (s //! (l - 1 - i), v)) l x
 
-    fun findi_r f s =
-        downfrom_until (fn i => filter f (i, s //! i)) $ length s
+    fun rfindi f s =
+        downfromUntil (fn i => filter f (i, s //! i)) $ length s
 
-    fun find_r f s =
-        downfrom_until (fn i => filter f (s //! i)) $ length s
+    fun rfind f s =
+        downfromUntil (fn i => filter f (s //! i)) $ length s
 
     (* There's no VectorSlicePair, unfortunately. Should there be? *)
-    fun collate_r f (s1, s2) =
+    fun rcollate f (s1, s2) =
         let val ls = (length s1, length s2)
             fun check (i, j) =
                 case f (s1 //! i, s2 //! j) of EQUAL => NONE | ord => SOME ord
-        in getOpt (downfrom_until2 check ls, Int.compare ls) end
+        in getOpt (downfromUntil2 check ls, Int.compare ls) end
 
     fun existsi f s = isSome $ findi f s
 

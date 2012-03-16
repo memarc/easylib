@@ -12,12 +12,12 @@ signature VECTOR_SLICE_X = sig
 
     val concatWith: 'a Vector.vector -> 'a slice list -> 'a Vector.vector
 
-    val findi_r : (int * 'a -> bool)
+    val rfindi : (int * 'a -> bool)
                   -> 'a slice -> (int * 'a) option
-    val find_r  : ('a -> bool) -> 'a slice -> 'a option
+    val rfind  : ('a -> bool) -> 'a slice -> 'a option
     val existsi : (int * 'a -> bool) -> 'a slice -> bool
     val alli : (int * 'a -> bool) -> 'a slice -> bool
-    val collate_r : ('a * 'a -> order)
+    val rcollate : ('a * 'a -> order)
                     -> 'a slice * 'a slice -> order
     val tokens: ('a -> bool) -> 'a slice -> 'a slice list
     val fields: ('a -> bool) -> 'a slice -> 'a slice list

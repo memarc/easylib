@@ -24,18 +24,18 @@ struct
 
     fun concatWith sep vs = concat $ ListX.intersperse (full sep) vs
 
-    fun findi_r f v =
-        downfrom_until (fn i => filter f (i, v //! i)) $ S.length v
+    fun rfindi f v =
+        downfromUntil (fn i => filter f (i, v //! i)) $ S.length v
 
-    fun find_r f v =
-        downfrom_until (fn i => filter f (v //! i)) $ S.length v
+    fun rfind f v =
+        downfromUntil (fn i => filter f (v //! i)) $ S.length v
 
     (* There's no VectorSlicePair, unfortunately. Should there be? *)
-    fun collate_r f (s1, s2) =
+    fun rcollate f (s1, s2) =
         let val ls = (S.length s1, S.length s2)
             fun check (i, j) =
                 case f (s1 //! i, s2 //! j) of EQUAL => NONE | ord => SOME ord
-        in getOpt (downfrom_until2 check ls, Int.compare ls) end
+        in getOpt (downfromUntil2 check ls, Int.compare ls) end
 
     fun existsi f v = isSome $ findi f v
 

@@ -40,11 +40,11 @@ signature VECTOR_PAIR = sig
                 -> (int * 'a * 'b) option
     val findEq : ('a * 'b -> bool) -> 'a vector * 'b vector
                 -> ('a * 'b) option
-    val findiEq_r : (int * 'a * 'b -> bool) -> 'a vector * 'b vector
+    val rfindiEq : (int * 'a * 'b -> bool) -> 'a vector * 'b vector
                 -> (int * 'a * 'b) option
-    val find_r : ('a * 'b -> bool) -> 'a vector * 'b vector
+    val rfind : ('a * 'b -> bool) -> 'a vector * 'b vector
                 -> ('a * 'b) option
-    val findEq_r : ('a * 'b -> bool) -> 'a vector * 'b vector
+    val rfindEq : ('a * 'b -> bool) -> 'a vector * 'b vector
                 -> ('a * 'b) option
     val all    : ('a * 'b -> bool) -> 'a vector * 'b vector -> bool
     val exists : ('a * 'b -> bool) -> 'a vector * 'b vector -> bool

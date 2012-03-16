@@ -45,11 +45,11 @@ sig
                 -> (int * lelem * relem) option
     val findEq : (lelem * relem -> bool) -> lvector * rvector
                 -> (lelem * relem) option
-    val findiEq_r : (int * lelem * relem -> bool) -> lvector * rvector
+    val rfindiEq : (int * lelem * relem -> bool) -> lvector * rvector
                 -> (int * lelem * relem) option
-    val find_r : (lelem * relem -> bool) -> lvector * rvector
+    val rfind : (lelem * relem -> bool) -> lvector * rvector
                 -> (lelem * relem) option
-    val findEq_r : (lelem * relem -> bool) -> lvector * rvector
+    val rfindEq : (lelem * relem -> bool) -> lvector * rvector
                 -> (lelem * relem) option
     val all    : (lelem * relem -> bool) -> lvector * rvector -> bool
     val exists : (lelem * relem -> bool) -> lvector * rvector -> bool

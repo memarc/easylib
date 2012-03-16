@@ -9,15 +9,15 @@ structure ListX :> LIST_X = struct
 
     open List
 
-    fun take_while f [] = []
-      | take_while f (x::xs) =
-        if f x then x :: take_while f xs else []
+    fun takeWhile f [] = []
+      | takeWhile f (x::xs) =
+        if f x then x :: takeWhile f xs else []
 
-    fun drop_while f [] = []
-      | drop_while f (l as x::xs) =
-        if f x then drop_while f xs else l
+    fun dropWhile f [] = []
+      | dropWhile f (l as x::xs) =
+        if f x then dropWhile f xs else l
 
-    fun rec_tabulate f =
+    fun tabulateRec f =
         let fun loop l =
                 case f l of NONE => l | SOME x => loop (x :: l)
         in loop [] end

@@ -7,7 +7,7 @@
 signature ITERATE_X =
 sig
     include ITERATE
-    val upto_until: (int -> 'a option) -> int -> 'a option
-    val downfrom_until: (int -> 'a option) -> int -> 'a option
-    val downfrom_until2: (int * int -> 'a option) -> (int * int) -> 'a option
+    val uptoUntil: (int -> 'a option) -> int -> 'a option
+    val downfromUntil: (int -> 'a option) -> int -> 'a option
+    val downfromUntil2: (int * int -> 'a option) -> (int * int) -> 'a option
 end
