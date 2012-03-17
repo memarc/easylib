@@ -95,6 +95,14 @@ struct
     fun foldr f x (s as {len=l,...}) =
         repeat (fn (i, v) => f (s //! (l - 1 - i), v)) l x
 
+    fun findAll f v =
+        foldr (fn (x, xs) => if f x then x :: xs else xs) [] v
+
+    fun findiAll f v =
+        let fun prepend (i, x, xs) =
+                let val p = (i, x) in if f p then p :: xs else xs end
+        in foldri prepend [] v end
+
     fun rfindi f s =
         downfromUntil (fn i => filter f (i, s //! i)) $ length s
 

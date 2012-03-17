@@ -18,6 +18,10 @@ signature MONO_VECTOR_X = sig
 
     val rfindi : (int * elem -> bool) -> vector -> (int * elem) option
 
+    val findAll: (elem -> bool) -> vector -> elem list
+
+    val findiAll: (int * elem -> bool) -> vector -> (int * elem) list
+
     val append : vector * vector -> vector
 
     val toList : vector -> elem list

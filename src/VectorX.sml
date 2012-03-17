@@ -19,6 +19,14 @@ structure VectorX :> VECTOR_X = struct
     fun rfind f v =
         downfromUntil (fn i => filter f (v // i)) $ V.length v
 
+    fun findAll f v =
+        foldr (fn (x, xs) => if f x then x :: xs else xs) [] v
+
+    fun findiAll f v =
+        let fun prepend (i, x, xs) =
+                let val p = (i, x) in if f p then p :: xs else xs end
+        in foldri prepend [] v end
+
     fun append (v1, v2) = V.concat [v1, v2]
 
     fun toList v = V.foldr (op ::) [] v

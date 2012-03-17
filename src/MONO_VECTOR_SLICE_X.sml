@@ -15,6 +15,9 @@ signature MONO_VECTOR_SLICE_X = sig
     val rfindi : (int * elem -> bool)
                   -> slice -> (int * elem) option
     val rfind  : (elem -> bool) -> slice -> elem option
+    val findiAll: (int * elem -> bool)
+                  -> slice -> (int * elem) list
+    val findAll: (elem -> bool) -> slice -> elem list
     val existsi : (int * elem -> bool) -> slice -> bool
     val alli : (int * elem -> bool) -> slice -> bool
     val rcollate : (elem * elem -> order)

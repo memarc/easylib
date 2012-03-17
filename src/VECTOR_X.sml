@@ -20,6 +20,10 @@ signature VECTOR_X = sig
 
     val rfindi : (int * 'a -> bool) -> 'a vector -> (int * 'a) option
 
+    val findAll: ('a -> bool) -> 'a vector -> 'a list
+
+    val findiAll: (int * 'a -> bool) -> 'a vector -> (int * 'a) list
+
     val append : 'a vector * 'a vector -> 'a vector
 
     val toList : 'a vector -> 'a list

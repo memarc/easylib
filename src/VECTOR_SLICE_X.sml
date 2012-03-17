@@ -15,6 +15,9 @@ signature VECTOR_SLICE_X = sig
     val rfindi : (int * 'a -> bool)
                   -> 'a slice -> (int * 'a) option
     val rfind  : ('a -> bool) -> 'a slice -> 'a option
+    val findiAll: (int * 'a -> bool)
+                  -> 'a slice -> (int * 'a) list
+    val findAll: ('a -> bool) -> 'a slice -> 'a list
     val existsi : (int * 'a -> bool) -> 'a slice -> bool
     val alli : (int * 'a -> bool) -> 'a slice -> bool
     val rcollate : ('a * 'a -> order)
