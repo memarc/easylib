@@ -9,10 +9,14 @@
 signature VECTOR_SEARCH =
 sig
 
-    val first: ''a -> ''a vector -> int option
-    val last: ''a -> ''a vector -> int option
+    val findElem: ''a -> ''a vector -> int option
+    val rfindElem: ''a -> ''a vector -> int option
+    val findAllElem: ''a -> ''a vector -> int list
     val isPrefix: ''a vector -> ''a vector -> bool
     val isSuffix: ''a vector -> ''a vector -> bool
+    val findSub: ''a vector -> ''a vector -> int option
+    val rfindSub: ''a vector -> ''a vector -> int option
     val isSub: ''a vector -> ''a vector -> bool
+    val isSubI: ''a vector -> ''a vector -> int -> bool
 
 end

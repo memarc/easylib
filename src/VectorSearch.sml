@@ -8,44 +8,78 @@ structure VectorSearch :> VECTOR_SEARCH =
 struct
 
     structure V = VectorX
+    structure IV = IntVector
     structure S = VectorSliceX
+    val for = Iterate.for
 
-    fun first x v =
+    fun findElem x v =
         Option.map #1 $ V.findi (fn (_, y) => y = x) v
 
-    fun last x v =
+    fun rfindElem x v =
         Option.map #1 $ V.rfindi (fn (_, y) => y = x) v
+
+    fun findAllElem x v =
+        let fun prepend (j, y, js) = if y = x then j :: js else js
+        in V.foldri prepend [] v end
+
+    fun isSubI v1 v2 j = V.alli (fn (i, y) => v2 // (j + i) = y) v1
+
+    fun isSubS (s, v, j) = S.alli (fn (i, y) => v // (j + i) = y) s
 
     fun isPrefix v1 v2 =
         let val (l1, l2) = (V.length v1, V.length v2)
-        in l1 <= l2 andalso V.alli (fn (i, y) => v2 // i = y) v1 end
+        in l1 <= l2 andalso isSubI v1 v2 0 end
 
     fun isSuffix v1 v2 =
         let val (l1, l2) = (V.length v1, V.length v2)
             val dl = l2 - l1
-        in dl >= 0 andalso V.alli (fn (i, y) => v2 // (dl + i) = y) v1 end
+        in dl >= 0 andalso isSubI v1 v2 dl end
 
-    fun isSub v1 v2 =
-        let val (l1, l2) = (V.length v1, V.length v2)
-            fun findPat ls =
-                let val lv = V.length v1
-                    val s = S.slice (v1, lv - ls, SOME ls)
-                    fun match ~1 = NONE
-                      | match i =
-                        if S.alli (fn (j, y) => v1 // (i + j) = y) s then SOME i
-                        else match (i - 1)
-                in match (lv - ls - 1) end
-            fun step [] = SOME (l1 - 1, 1)
-              | step ((~1, _) :: _) = NONE
-              | step ((i, j) :: _) =
-                let val m = case findPat (l1 - i) of NONE => i + 1 | SOME k => i - k
-                in SOME (i - 1, Int.max (j, m)) end
-            val nexttbl = V.fromList $ List.map #2 (ListX.tabulateRec step)
+    fun findSub' (v1, v2, l1, l2) =
+        let fun step (m, r as j :: _) = 
+                let val s = S.slice (v1, m, NONE) 
+                    fun hit ~1 = m + 1
+                      | hit i = if isSubS (s, v1, i) then m - i else hit (i - 1)
+                in Int.max (j, hit (m - 1)) :: r end
+            val nexttbl = IV.fromList $ for step (l1 - 1, 1, ~1) [1]
             fun check i =
-                if i > l2 - l1 then false
-                else case V.rfindi (fn (j, y) => v2 // (i + j) <> y) v1 of
-                         NONE => true
-                       | SOME (k, _) => check (i + nexttbl // k)
+                if i > l2 - l1 then NONE else
+                case V.rfindi (fn (j, y) => v2 // (i + j) <> y) v1 of
+                    NONE => SOME i
+                  | SOME (k, _) => check (i + IV.sub (nexttbl, k))
         in check 0 end
+
+    fun findSub v1 v2 =
+        let val (l1, l2) = (V.length v1, V.length v2) in
+            case l1 of
+                0 => SOME 0
+              | 1 => findElem (v1 // 0) v2
+              | _ => findSub' (v1, v2, l1, l2)
+        end
+
+    fun isSub v1 v2 = isSome $ findSub v1 v2
+
+    fun rfindSub' (v1, v2, l1, l2) =
+        let fun step (m, r as j :: _) =
+                let val m' = l1 - m
+                    val s = S.slice (v1, 0, SOME m)
+                    fun hit ~1 = m' + 1
+                      | hit i = if isSubS (s, v1, m' - i) then m' - i else hit (i - 1)
+                in Int.max (j, hit m') :: r end
+            val nexttbl = IV.fromList $ for step (1, l1 - 1, 1) [1]
+            fun check i =
+                if i < 0 then NONE else
+                case V.findi (fn (j, y) => v2 // (i + j) <> y) v1 of
+                    NONE => SOME i
+                  | SOME (k, _) => check (i - IV.sub (nexttbl, l1 - 1 - k))
+        in check (l2 - l1) end
+
+    fun rfindSub v1 v2 =
+        let val (l1, l2) = (V.length v1, V.length v2) in
+            case l1 of
+                0 => SOME l2
+              | 1 => rfindElem (v1 // 0) v2
+              | _ => rfindSub' (v1, v2, l1, l2)
+        end
 
 end
