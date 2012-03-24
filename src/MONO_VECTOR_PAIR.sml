@@ -39,12 +39,12 @@ sig
                     -> 'c -> lvector * rvector -> 'c
     val findi : (int * lelem * relem -> bool) -> lvector * rvector
                 -> (int * lelem * relem) option
-    (* val findiAll: (int * lelem * relem -> bool) -> lvector * rvector
-     *             -> (int * lelem * relem) list *)
     val find : (lelem * relem -> bool) -> lvector * rvector
                 -> (lelem * relem) option
-    (* val findAll: (lelem * relem -> bool) -> lvector * rvector
-     *             -> (lelem * relem) list *)
+    val findiAllEq: (int * lelem * relem -> bool) -> lvector * rvector
+                -> (int * lelem * relem) list
+    val findAllEq: (lelem * relem -> bool) -> lvector * rvector
+                -> (lelem * relem) list
     val findiEq : (int * lelem * relem -> bool) -> lvector * rvector
                 -> (int * lelem * relem) option
     val findEq : (lelem * relem -> bool) -> lvector * rvector

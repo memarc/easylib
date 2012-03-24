@@ -36,10 +36,10 @@ signature VECTOR_PAIR = sig
                 -> (int * 'a * 'b) option
     val find : ('a * 'b -> bool) -> 'a vector * 'b vector
                 -> ('a * 'b) option
-    (* val findiAll: (int * 'a * 'b -> bool) -> 'a vector * 'b vector
-     *             -> (int * 'a * 'b) list
-     * val findAll: ('a * 'b -> bool) -> 'a vector * 'b vector
-     *             -> ('a * 'b) list *)
+    val findiAllEq: (int * 'a * 'b -> bool) -> 'a vector * 'b vector
+                -> (int * 'a * 'b) list
+    val findAllEq: ('a * 'b -> bool) -> 'a vector * 'b vector
+                -> ('a * 'b) list
     val findiEq : (int * 'a * 'b -> bool) -> 'a vector * 'b vector
                 -> (int * 'a * 'b) option
     val findEq : ('a * 'b -> bool) -> 'a vector * 'b vector

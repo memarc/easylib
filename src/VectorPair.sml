@@ -99,4 +99,14 @@ structure VectorPair :> VECTOR_PAIR = struct
     fun allEq f (v, v') = not $ isSome $ findEq (not o f) (v, v')
     fun alliEq f (v, v') = not $ isSome $ findiEq (not o f) (v, v')
 
+    fun findAllEq f (v1, v2) =
+        let fun prepend (x1, x2, xs) =
+                let val p = (x1, x2) in if f p then p :: xs else xs end
+        in foldrEq prepend [] (v1, v2) end
+
+    fun findiAllEq f (v1, v2) =
+        let fun prepend (i, x1, x2, xs) =
+                let val p = (i, x1, x2) in if f p then p :: xs else xs end
+        in foldriEq prepend [] (v1, v2) end
+
 end
