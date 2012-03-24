@@ -36,7 +36,8 @@ struct
         in dl >= 0 andalso isSubI v1 v2 dl end
 
     fun findSub' (v1, v2, l1, l2) =
-        let fun step (m, r as j :: _) = 
+        let fun step (_, []) = raise LibBase.Impossible "VectorSearch: step []"
+              | step (m, r as j :: _) = 
                 let val s = S.slice (v1, m, NONE) 
                     fun hit ~1 = m + 1
                       | hit i = if isSubS (s, v1, i) then m - i else hit (i - 1)
@@ -60,7 +61,8 @@ struct
     fun isSub v1 v2 = isSome $ findSub v1 v2
 
     fun rfindSub' (v1, v2, l1, l2) =
-        let fun step (m, r as j :: _) =
+        let fun step (_, []) = raise LibBase.Impossible "VectorSearch: step []"
+              | step (m, r as j :: _) =
                 let val m' = l1 - m
                     val s = S.slice (v1, 0, SOME m)
                     fun hit ~1 = m' + 1
