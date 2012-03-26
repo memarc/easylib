@@ -1,0 +1,14 @@
+This project is an attempt to "fill the holes" in the SML Basis library
+and eventually build a "batteries included" modular suite of libraries
+on top of that.  I know there are similar projects out there but they
+all seem to either focus on a narrow area (like graph algorithms) or
+they require a specific ML implementation (these days, mostly SMLNJ or
+MLton).
+
+I work with PolyML because it seems to be the implementation which is
+closest to the original spirit of ML.  But if you detect any platform
+dependency in the code please let me know, it is a bug.
+
+All that said I will happily use pieces of the SMLNJ library (for
+example) when it suits me.  Those pieces retain their original copyright
+and license, of course.
