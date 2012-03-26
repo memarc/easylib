@@ -8,8 +8,6 @@ signature MONO_VECTOR_SLICE_PAIR = sig
 
     type lelem
     type relem
-    type lvector
-    type rvector
     type lslice
     type rslice
 
