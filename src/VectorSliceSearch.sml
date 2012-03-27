@@ -61,21 +61,20 @@ struct
     fun isSub v1 v2 = isSome $ findSub v1 v2
     
     fun rfindSub' (v1, v2, l1, l2) =
-        let fun `i = l1 - i
-            fun step (_, []) = [1]
+        let fun step (_, []) = [1]
               | step (m, r as j :: _) =
                 let val s = S.subslice (v1, 0, SOME m)
-                    fun hit ~1 = `m + 1
-                      | hit i =
-                        let val i' = `m - i
-                        in if isSubI s v1 i' then i' else hit (i - 1) end
-                in Int.max (j, hit $ `m) :: r end
-            val nexttbl = IV.fromList $ for step (0, `1, 1) []
+                    fun hit i =
+                        if i > l1 - m then m + 1
+                        else if isSubI s v1 i then l1 - i
+                        else hit (i + 1)
+                in Int.max (j, hit m) :: r end
+            val nexttbl = IV.fromList o rev $ for step (0, l1 - 1, 1) []
             fun check i =
                 if i < 0 then NONE else
                 case S.findi (fn (j, y) => v2 //: (i + j) <> y) v1 of
                     NONE => SOME i
-                  | SOME (k, _) => check (i - IV.sub (nexttbl, `1 - k))
+                  | SOME (k, _) => check (i - IV.sub (nexttbl, k))
         in check (l2 - l1) end
     
     fun rfindSub v1 v2 =
