@@ -20,4 +20,6 @@ struct
     fun downfromUntil2 f (m, n) =
         let fun f' i = f (m - 1 - i, n - 1 - i) in find (f', Int.min (m, n)) end
 
+    fun range n = IntVector.tabulate (n, id)
+
 end

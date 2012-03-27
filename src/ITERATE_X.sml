@@ -10,4 +10,5 @@ sig
     val uptoUntil: (int -> 'a option) -> int -> 'a option
     val downfromUntil: (int -> 'a option) -> int -> 'a option
     val downfromUntil2: (int * int -> 'a option) -> (int * int) -> 'a option
+    val range: int -> IntVector.vector
 end
