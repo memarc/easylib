@@ -22,7 +22,7 @@ fun konst y x = y
 (* This is simply the function application.  It is reified like this
  * to change its precedence and associativity. *)
 fun op $ (f, x) = f x
-infixr 3 $
+infixr 2 $
 
 (* Right on left application.  Useful for folds. *)
 fun op >$ (x, f) = f x
