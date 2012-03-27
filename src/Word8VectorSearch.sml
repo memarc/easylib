@@ -4,7 +4,8 @@
  * modification, are permitted provided that the conditions spelled out in
  * the file LICENSE are met. *)
 
-structure Word8VectorSearch =
-    MonoVectorSearch (structure V = Word8VectorX;
-                     structure S = Word8VectorSliceX;
-                     structure SS = Word8VectorSliceSearch)
+structure Word8VectorSearch = MonoVectorSearch (
+    structure V = Word8VectorX
+    structure S = Word8VectorSliceX
+    structure SS = Word8VectorSliceSearch
+)

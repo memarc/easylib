@@ -4,7 +4,8 @@
  * modification, are permitted provided that the conditions spelled out in
  * the file LICENSE are met. *)
 
-structure IntVectorSearch =
-    MonoVectorSearch (structure V = IntVectorX;
-                     structure S = IntVectorSliceX;
-                     structure SS = IntVectorSliceSearch)
+structure IntVectorSearch = MonoVectorSearch (
+    structure V = IntVectorX
+    structure S = IntVectorSliceX
+    structure SS = IntVectorSliceSearch
+)

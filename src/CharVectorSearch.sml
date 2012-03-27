@@ -4,7 +4,8 @@
  * modification, are permitted provided that the conditions spelled out in
  * the file LICENSE are met. *)
 
-structure CharVectorSearch =
-    MonoVectorSearch (structure V = CharVectorX;
-                     structure S = CharVectorSliceX;
-                     structure SS = CharVectorSliceSearch)
+structure CharVectorSearch = MonoVectorSearch (
+    structure V = CharVectorX
+    structure S = CharVectorSliceX
+    structure SS = CharVectorSliceSearch
+)

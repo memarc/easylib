@@ -6,12 +6,15 @@
 
 (* If these functions exists for lists, they should exist for vectors. *)
 
-functor MonoVectorPair (structure L: MONO_VECTOR; structure R: MONO_VECTOR):>
-        MONO_VECTOR_PAIR
-        where type lelem = L.elem
-        where type lvector = L.vector
-        where type relem = R.elem
-        where type rvector = R.vector =
+functor MonoVectorPair (
+    structure L: MONO_VECTOR
+    structure R: MONO_VECTOR
+):> MONO_VECTOR_PAIR
+    where type lelem = L.elem
+    where type lvector = L.vector
+    where type relem = R.elem
+    where type rvector = R.vector =
+
 struct
 
     structure V = Vector

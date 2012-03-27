@@ -8,7 +8,7 @@
 
 
 functor MonoVectorSlicePair (
-    structure L: MONO_VECTOR_SLICE;
+    structure L: MONO_VECTOR_SLICE
     structure R: MONO_VECTOR_SLICE
 ):> MONO_VECTOR_SLICE_PAIR
     where type lelem = L.elem

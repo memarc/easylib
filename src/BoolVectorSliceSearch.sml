@@ -4,8 +4,7 @@
  * modification, are permitted provided that the conditions spelled out in
  * the file LICENSE are met. *)
 
-structure BoolVectorSliceSearch = MonoVectorSliceSearch
-                                  (structure S = BoolVectorSliceX;
-                                  structure E = struct type elem = bool end)
-
-                                            
+structure BoolVectorSliceSearch = MonoVectorSliceSearch (
+    structure S = BoolVectorSliceX
+    structure E = struct type elem = bool end
+)

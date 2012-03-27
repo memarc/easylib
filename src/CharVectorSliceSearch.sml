@@ -4,6 +4,7 @@
  * modification, are permitted provided that the conditions spelled out in
  * the file LICENSE are met. *)
 
-structure CharVectorSliceSearch = MonoVectorSliceSearch
-                                  (structure S = CharVectorSliceX;
-                                  structure E = struct type elem = char end)
+structure CharVectorSliceSearch = MonoVectorSliceSearch (
+    structure S = CharVectorSliceX
+    structure E = struct type elem = char end
+)
