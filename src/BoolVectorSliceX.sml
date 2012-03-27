@@ -109,7 +109,6 @@ struct
     fun rfind f s =
         downfromUntil (fn i => filter f (s //! i)) $ length s
 
-    (* There's no VectorSlicePair, unfortunately. Should there be? *)
     fun rcollate f (s1, s2) =
         let val ls = (length s1, length s2)
             fun check (i, j) =

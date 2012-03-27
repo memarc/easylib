@@ -38,7 +38,6 @@ struct
                 let val p = (i, x) in if f p then p :: xs else xs end
         in foldri prepend [] v end
 
-    (* There's no VectorSlicePair, unfortunately. Should there be? *)
     fun rcollate f (s1, s2) =
         let val ls = (S.length s1, S.length s2)
             fun check (i, j) =
