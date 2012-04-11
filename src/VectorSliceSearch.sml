@@ -85,4 +85,18 @@ struct
               | _ => rfindSub' (v1, v2, l1, l2)
         end
 
+    fun findSubsStride (v1 : ''a slice, v2 : ''a slice, stride: int) =
+        let val l1 = S.length v1
+            fun loop (acc, l) =
+                case rfindSub v1 $ S.subslice (v2, 0, SOME l) of
+                    NONE => acc
+                  | SOME n => 
+                    if n < stride then n :: acc
+                    else loop (n :: acc, n - stride + l1)
+        in loop ([], S.length v2) end
+
+    fun findOverlappingSubs v1 v2 = findSubsStride (v1, v2, 1)
+
+    fun findDisjointSubs v1 v2 = findSubsStride (v1, v2, S.length v1)
+
 end

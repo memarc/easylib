@@ -21,5 +21,8 @@ sig
     val isSub: ''a slice -> ''a slice -> bool
     val isSubI: ''a slice -> ''a slice -> int -> bool
 
+    val findOverlappingSubs: ''a slice -> ''a slice -> int list
+    val findDisjointSubs: ''a slice -> ''a slice -> int list
+
 end
     where type ''a slice = ''a VectorSlice.slice
