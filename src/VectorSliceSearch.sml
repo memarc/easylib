@@ -96,7 +96,7 @@ struct
 
     fun findSubsStride (_, _, 0, _, _) =
         argh ("VectorSliceSearch", "findSubsStride", "l1=0: undefined")
-      | findSubsStride (v1, v2, 1, l2, 1) =
+      | findSubsStride (v1, v2, 1, _, 1) =
         findAllElem (v1 //: 0) v2
       | findSubsStride (v1, v2, l1, l2, stride) =
         let val nexttbl = bkwdTable (v1, l1)
