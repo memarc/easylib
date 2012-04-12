@@ -20,5 +20,7 @@ sig
     val rfindSub: slice -> slice -> int option
     val isSub: slice -> slice -> bool
     val isSubI: slice -> slice -> int -> bool
+    val findOverlappingSubs: slice -> slice -> int list
+    val findDisjointSubs: slice -> slice -> int list
 
 end
