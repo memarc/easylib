@@ -91,9 +91,13 @@ struct
               | _ => rfindSub' (v1, v2, l1, l2)
         end
 
-    fun findSubsStride (v1 : ''a slice, v2 : ''a slice, stride: int) =
-        let val (l1, l2) = (S.length v1, S.length v2)
-            val nexttbl = bkwdTable (v1, l1)
+    fun argh (m, f, msg) =
+        LibBase.failure {module=m, func=f, msg=msg}
+
+    fun findSubsStride (_, _, 0, _, _) =
+        argh ("VectorSliceSearch", "findSubsStride", "l1=0: undefined")
+      | findSubsStride (v1, v2, l1, l2, stride) =
+        let val nexttbl = bkwdTable (v1, l1)
             fun loop (acc, n) =
                 if n < 0 then acc else 
                 case S.findi (fn (j, y) => v2 //: (n + j) <> y) v1 of
@@ -101,8 +105,12 @@ struct
                   | SOME (k, _) => loop (acc, n - IV.sub (nexttbl, k))
         in loop ([], l2 - l1) end
 
-    fun findOverlappingSubs v1 v2 = findSubsStride (v1, v2, 1)
+    fun findOverlappingSubs v1 v2 = 
+        let val (l1, l2) = (S.length v1, S.length v2)
+        in findSubsStride (v1, v2, l1, l2, 1) end
 
-    fun findDisjointSubs v1 v2 = findSubsStride (v1, v2, S.length v1)
+    fun findDisjointSubs v1 v2 =
+        let val (l1, l2) = (S.length v1, S.length v2)
+        in findSubsStride (v1, v2, l1, l2, l1) end
 
 end
