@@ -35,14 +35,17 @@ struct
             val dl = l2 - l1
         in dl >= 0 andalso isSubI v1 v2 dl end
 
-    fun findSub' (v1, v2, l1, l2) =
+    fun fwdTable (v, l) =
         let fun step (_, []) = [1]
               | step (m, r as j :: _) = 
-                let val s = S.subslice (v1, m, NONE) 
+                let val s = S.subslice (v, m, NONE) 
                     fun hit ~1 = m + 1
-                      | hit i = if isSubI s v1 i then m - i else hit (i - 1)
+                      | hit i = if isSubI s v i then m - i else hit (i - 1)
                 in Int.max (j, hit (m - 1)) :: r end
-            val nexttbl = IV.fromList $ for step (l1, 1, ~1) []
+        in IV.fromList $ for step (l, 1, ~1) [] end
+
+    fun findSub' (v1, v2, l1, l2) =
+        let val nexttbl = fwdTable (v1, l1)
             fun check i =
                 if i > l2 - l1 then NONE else
                 case S.rfindi (fn (j, y) => v2 //: (i + j) <> y) v1 of
@@ -60,16 +63,19 @@ struct
     
     fun isSub v1 v2 = isSome $ findSub v1 v2
     
-    fun rfindSub' (v1, v2, l1, l2) =
+    fun bkwdTable (v, l) =
         let fun step (_, []) = [1]
               | step (m, r as j :: _) =
-                let val s = S.subslice (v1, 0, SOME m)
+                let val s = S.subslice (v, 0, SOME m)
                     fun hit i =
-                        if i > l1 - m then m + 1
-                        else if isSubI s v1 i then l1 - i
+                        if i > l - m then m + 1
+                        else if isSubI s v i then l - i
                         else hit (i + 1)
                 in Int.max (j, hit m) :: r end
-            val nexttbl = IV.fromList o rev $ for step (0, l1 - 1, 1) []
+        in IV.fromList o rev $ for step (0, l - 1, 1) [] end
+
+    fun rfindSub' (v1, v2, l1, l2) =
+        let val nexttbl = bkwdTable (v1, l1)
             fun check i =
                 if i < 0 then NONE else
                 case S.findi (fn (j, y) => v2 //: (i + j) <> y) v1 of
@@ -86,14 +92,14 @@ struct
         end
 
     fun findSubsStride (v1 : ''a slice, v2 : ''a slice, stride: int) =
-        let val l1 = S.length v1
-            fun loop (acc, l) =
-                case rfindSub v1 $ S.subslice (v2, 0, SOME l) of
-                    NONE => acc
-                  | SOME n => 
-                    if n < stride then n :: acc
-                    else loop (n :: acc, n - stride + l1)
-        in loop ([], S.length v2) end
+        let val (l1, l2) = (S.length v1, S.length v2)
+            val nexttbl = bkwdTable (v1, l1)
+            fun loop (acc, n) =
+                if n < 0 then acc else 
+                case S.findi (fn (j, y) => v2 //: (n + j) <> y) v1 of
+                    NONE => loop (n :: acc, n - stride)
+                  | SOME (k, _) => loop (acc, n - IV.sub (nexttbl, k))
+        in loop ([], l2 - l1) end
 
     fun findOverlappingSubs v1 v2 = findSubsStride (v1, v2, 1)
 
