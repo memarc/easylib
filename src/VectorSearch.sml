@@ -32,10 +32,18 @@ struct
             val dl = l2 - l1
         in dl >= 0 andalso isSubI v1 v2 dl end
 
-    fun findSub v1 v2 = SS.findSub (S.full v1) (S.full v2)
+    type ''a lrsearch = ''a SS.lrsearch
 
-    fun isSub v1 v2 = isSome $ findSub v1 v2
+    fun compile v = SS.compile (S.full v)
 
-    fun rfindSub v1 v2 = SS.rfindSub (S.full v1) (S.full v2)
+    fun findSub lsrch v = SS.findSub lsrch (S.full v)
+
+    fun isSub v1 v2 = isSome $ findSub (compile v1) v2
+
+    type ''a rlsearch = ''a SS.rlsearch
+
+    fun rcompile v = SS.rcompile (S.full v)
+
+    fun rfindSub rsrch v = SS.rfindSub rsrch (S.full v)
 
 end

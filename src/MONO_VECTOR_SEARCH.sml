@@ -17,9 +17,15 @@ sig
     val findAllElem: elem -> vector -> int list
     val isPrefix: vector -> vector -> bool
     val isSuffix: vector -> vector -> bool
-    val findSub: vector -> vector -> int option
-    val rfindSub: vector -> vector -> int option
     val isSub: vector -> vector -> bool
     val isSubI: vector -> vector -> int -> bool
+
+    type lrsearch
+    val compile: vector -> lrsearch
+    val findSub: lrsearch -> vector -> int option
+
+    type rlsearch
+    val rcompile: vector -> rlsearch
+    val rfindSub: rlsearch -> vector -> int option
 
 end

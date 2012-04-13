@@ -16,13 +16,25 @@ sig
     val findAllElem: ''a -> ''a slice -> int list
     val isPrefix: ''a slice -> ''a slice -> bool
     val isSuffix: ''a slice -> ''a slice -> bool
-    val findSub: ''a slice -> ''a slice -> int option
-    val rfindSub: ''a slice -> ''a slice -> int option
     val isSub: ''a slice -> ''a slice -> bool
     val isSubI: ''a slice -> ''a slice -> int -> bool
 
-    val findOverlappingSubs: ''a slice -> ''a slice -> int list
-    val findDisjointSubs: ''a slice -> ''a slice -> int list
+    (* For maximum power and efficiency in the substring search API we
+     * have to expose the precompilation stage.  This could have been avoided if
+     * we had only the rightmost and leftmost search by clever use of currying,
+     * but that doesn't help when we also have the disjoint and overlapping
+     * searches. *)
+
+    type ''a lrsearch
+    type ''a rlsearch
+
+    val compile: ''a slice -> ''a lrsearch
+    val findSub: ''a lrsearch -> ''a slice -> int option
+
+    val rcompile: ''a slice -> ''a rlsearch
+    val rfindSub: ''a rlsearch -> ''a slice -> int option
+    val findOverlappingSubs: ''a rlsearch -> ''a slice -> int list
+    val findDisjointSubs: ''a rlsearch -> ''a slice -> int list
 
 end
     where type ''a slice = ''a VectorSlice.slice
