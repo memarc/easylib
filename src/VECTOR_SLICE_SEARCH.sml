@@ -33,8 +33,8 @@ sig
 
     val rcompile: ''a slice -> ''a rlsearch
     val rfindSub: ''a rlsearch -> ''a slice -> int option
-    val findOverlappingSubs: ''a rlsearch -> ''a slice -> int list
-    val findDisjointSubs: ''a rlsearch -> ''a slice -> int list
+    val findOverlappingSubs: ''a lrsearch -> ''a slice -> int list
+    val findDisjointSubs: ''a lrsearch -> ''a slice -> int list
 
 end
     where type ''a slice = ''a VectorSlice.slice

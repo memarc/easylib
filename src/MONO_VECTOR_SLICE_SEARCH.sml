@@ -33,7 +33,7 @@ sig
 
     val rcompile: slice -> rlsearch
     val rfindSub: rlsearch -> slice -> int option
-    val findOverlappingSubs: rlsearch -> slice -> int list
-    val findDisjointSubs: rlsearch -> slice -> int list
+    val findOverlappingSubs: lrsearch -> slice -> int list
+    val findDisjointSubs: lrsearch -> slice -> int list
 
 end

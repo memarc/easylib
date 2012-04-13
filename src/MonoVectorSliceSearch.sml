@@ -65,8 +65,11 @@ struct
                 val nexttbl = IV.fromList $ for step (l, 1, ~1) []
         in LR { sl = v, len = l, topt = SOME nexttbl } end
 
+    fun really () = raise (LibBase.Impossible "MonoVectorSliceSearch: compile")
+
     fun findSub (LR { len = 0, ... }) _ = SOME 0
       | findSub (LR { sl = v1, len = 1, ... }) v2 = findElem (v1 //: 0) v2
+      | findSub (LR { sl = _, len = _, topt = NONE }) _ = really ()
       | findSub (LR { sl = v1, len = l1, topt = SOME nexttbl }) v2 =
         let val l2 = S.length v2
             fun check i =
@@ -98,6 +101,7 @@ struct
 
     fun rfindSub (RL { len = 0, ... }) v2 = SOME (S.length v2)
       | rfindSub (RL { len = 1, sl = v1 , ... }) v2 = rfindElem (v1 //: 0) v2
+      | rfindSub (RL { sl = _, len = _, topt = NONE }) _ = really ()
       | rfindSub (RL { len = l1, sl = v1, topt = SOME nexttbl }) v2 =
         let val l2 = S.length v2
             fun check i =
@@ -110,22 +114,23 @@ struct
     fun argh (m, f, msg) =
         LibBase.failure {module=m, func=f, msg=msg}
 
-    fun findSubsStride (RL { len = 0, ... }, _) _ =
+    fun findSubsStride (LR { len = 0, ... }, _) _ =
         argh ("VectorSliceSearch", "findSubsStride", "len=0: undefined")
-      | findSubsStride (RL { len = 1, sl = v1, ... }, _) v2 =
+      | findSubsStride (LR { len = 1, sl = v1, ... }, _) v2 =
         findAllElem (v1 //: 0) v2
-      | findSubsStride (RL { len = l1, sl = v1, topt = SOME tbl }, stride) v2 =
+      | findSubsStride (LR { sl = _, len = _, topt = NONE }, _) _ = really ()
+      | findSubsStride (LR { len = l1, sl = v1, topt = SOME tbl }, stride) v2 =
         let val l2 = S.length v2
             fun loop (acc, n) =
-                if n < 0 then acc else 
-                case S.findi (fn (j, y) => v2 //: (n + j) <> y) v1 of
-                    NONE => loop (n :: acc, n - stride)
-                  | SOME (k, _) => loop (acc, n - IV.sub (tbl, k))
-        in loop ([], l2 - l1) end
+                if n > l2 - l1 then acc else 
+                case S.rfindi (fn (j, y) => v2 //: (n + j) <> y) v1 of
+                    NONE => loop (n :: acc, n + stride)
+                  | SOME (k, _) => loop (acc, n + IV.sub (tbl, k))
+        in rev $ loop ([], 0) end
 
-    fun findOverlappingSubs rsearch = findSubsStride (rsearch, 1)
+    fun findOverlappingSubs lr = findSubsStride (lr, 1)
 
-    fun findDisjointSubs (rsearch as RL { len = l, ... }) = 
-        findSubsStride (rsearch, l)
+    fun findDisjointSubs (lr as LR { len = l, ... }) = 
+        findSubsStride (lr, l)
 
 end
